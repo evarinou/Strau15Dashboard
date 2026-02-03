@@ -1075,12 +1075,22 @@ export interface AlarmState {
   nextAlarmLabel: string
   isAvailable: boolean
 
+  // Wake-up options
+  sunriseEnabled: boolean // Sanftes Aufwachen (Aufwachlicht)
+  sunriseDuration: number // Aufwachlicht Dauer in Minuten
+  coffeeEnabled: boolean // Kaffeemaschine beim Aufstehen
+  snoozeDuration: number // Snooze Dauer in Minuten
+
   // Actions
   setEnabled: (enabled: boolean) => void
   setMode: (mode: AlarmMode) => void
   setWeekdayTime: (time: string) => void
   setWeekendTime: (time: string) => void
   setStandardTime: (time: string) => void
+  setSunriseEnabled: (enabled: boolean) => void
+  setSunriseDuration: (minutes: number) => void
+  setCoffeeEnabled: (enabled: boolean) => void
+  setSnoozeDuration: (minutes: number) => void
 }
 
 function parseTimeFromEntity(entity: HassEntity | undefined): string | null {
@@ -1147,11 +1157,23 @@ export function useAlarm(): AlarmState {
   const weekendEntity = getEntity('input_datetime.wecker_wochenende')
   const standardEntity = getEntity('input_datetime.wecker')
 
+  // Wake-up option entities
+  const sunriseEntity = getEntity('input_boolean.sanftes_aufwachen')
+  const sunriseDurationEntity = getEntity('input_number.aufwachlicht_dauer')
+  const coffeeEntity = getEntity('input_boolean.kaffee_beim_wecker')
+  const snoozeEntity = getEntity('input_number.snooze_dauer')
+
   const isEnabled = enabledEntity?.state === 'on'
   const mode = (modeEntity?.state as AlarmMode) || 'Aus'
   const weekdayTime = parseTimeFromEntity(weekdayEntity)
   const weekendTime = parseTimeFromEntity(weekendEntity)
   const standardTime = parseTimeFromEntity(standardEntity)
+
+  // Wake-up options
+  const sunriseEnabled = sunriseEntity?.state === 'on'
+  const sunriseDuration = parseFloat(sunriseDurationEntity?.state || '10')
+  const coffeeEnabled = coffeeEntity?.state === 'on'
+  const snoozeDuration = parseFloat(snoozeEntity?.state || '9')
 
   const { time: nextAlarmTime, label: nextAlarmLabel } = getNextAlarmInfo(
     isEnabled,
@@ -1207,6 +1229,40 @@ export function useAlarm(): AlarmState {
     })
   }
 
+  const setSunriseEnabled = (enabled: boolean) => {
+    callService({
+      domain: 'input_boolean',
+      service: enabled ? 'turn_on' : 'turn_off',
+      target: { entity_id: 'input_boolean.sanftes_aufwachen' },
+    })
+  }
+
+  const setSunriseDuration = (minutes: number) => {
+    callService({
+      domain: 'input_number',
+      service: 'set_value',
+      target: { entity_id: 'input_number.aufwachlicht_dauer' },
+      service_data: { value: minutes },
+    })
+  }
+
+  const setCoffeeEnabled = (enabled: boolean) => {
+    callService({
+      domain: 'input_boolean',
+      service: enabled ? 'turn_on' : 'turn_off',
+      target: { entity_id: 'input_boolean.kaffee_beim_wecker' },
+    })
+  }
+
+  const setSnoozeDuration = (minutes: number) => {
+    callService({
+      domain: 'input_number',
+      service: 'set_value',
+      target: { entity_id: 'input_number.snooze_dauer' },
+      service_data: { value: minutes },
+    })
+  }
+
   return {
     isEnabled,
     mode,
@@ -1216,11 +1272,19 @@ export function useAlarm(): AlarmState {
     nextAlarmTime,
     nextAlarmLabel,
     isAvailable,
+    sunriseEnabled,
+    sunriseDuration,
+    coffeeEnabled,
+    snoozeDuration,
     setEnabled,
     setMode,
     setWeekdayTime,
     setWeekendTime,
     setStandardTime,
+    setSunriseEnabled,
+    setSunriseDuration,
+    setCoffeeEnabled,
+    setSnoozeDuration,
   }
 }
 

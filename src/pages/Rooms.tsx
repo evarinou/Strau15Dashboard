@@ -35,7 +35,7 @@ const roomIcons: Record<string, typeof Sofa> = {
 // Map area IDs to light entities
 const ROOM_LIGHTS: Record<string, string[]> = {
   wohnzimmer: ['light.blumenlampe', 'light.mondschein'],
-  schlafzimmer: ['light.schlafzimmer_aufwachlicht', 'light.doppellampe', 'light.lampeecke'],
+  schlafzimmer: ['light.doppellampe', 'light.lampeecke'],
   bad: ['light.tasmota_waschtisch', 'light.badezimmerd1'],
   bucherzimmer: ['light.sonoff_bucherzimmer', 'light.hue_filament_bulb'],
   innenhof: ['light.sonoff_innenhof'],
@@ -63,7 +63,6 @@ const LIGHT_NAMES: Record<string, string> = {
   'light.blumenlampe': 'Blume',
   'light.mondschein': 'Mond',
   'light.lampeecke': 'Ecke',
-  'light.schlafzimmer_aufwachlicht': 'Aufwach',
   'light.tasmota_waschtisch': 'Wasch',
   'light.badezimmerd1': 'Decke',
   'light.sonoff_bucherzimmer': 'Sonoff',

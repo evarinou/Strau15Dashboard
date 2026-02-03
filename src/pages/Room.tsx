@@ -8,7 +8,7 @@ import { useHA, useMediaPlayer } from '../contexts/HomeAssistantContext'
 // Map area IDs to light entities (light.*)
 const ROOM_LIGHTS: Record<string, string[]> = {
   wohnzimmer: ['light.blumenlampe', 'light.mondschein'],
-  schlafzimmer: ['light.schlafzimmer_aufwachlicht', 'light.doppellampe', 'light.lampeecke'],
+  schlafzimmer: ['light.doppellampe', 'light.lampeecke'],
   bad: ['light.tasmota_waschtisch', 'light.badezimmerd1'],
   bucherzimmer: ['light.sonoff_bucherzimmer', 'light.hue_filament_bulb'],
   innenhof: ['light.sonoff_innenhof'],
