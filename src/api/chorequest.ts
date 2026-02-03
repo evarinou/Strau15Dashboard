@@ -13,19 +13,17 @@ import type {
   CompleteRequest,
   AssignRequest,
 } from '../types/chorequest'
-
-const BASE_URL = import.meta.env.VITE_CHOREQUEST_URL
-const TOKEN = import.meta.env.VITE_CHOREQUEST_TOKEN
+import { config } from '../config/runtime'
 
 async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
+  const response = await fetch(`${config.CHOREQUEST_URL}${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${TOKEN}`,
+      Authorization: `Bearer ${config.CHOREQUEST_TOKEN}`,
       ...options.headers,
     },
   })

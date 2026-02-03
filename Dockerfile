@@ -12,13 +12,7 @@ RUN npm ci
 # Copy source
 COPY . .
 
-# Build args for environment variables
-ARG VITE_HA_URL
-ARG VITE_HA_WS_URL
-ARG VITE_CHOREQUEST_URL
-ARG VITE_HA_TOKEN
-
-# Build the app
+# Build the app (no tokens needed at build time)
 RUN npm run build
 
 # Production stage
@@ -30,6 +24,10 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built assets
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Expose port
 EXPOSE 80
 
@@ -37,4 +35,4 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

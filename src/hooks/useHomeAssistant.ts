@@ -6,9 +6,7 @@ import type {
   HassEventMessage,
   HassServiceCall,
 } from '../types/homeassistant'
-
-const HA_WS_URL = import.meta.env.VITE_HA_WS_URL
-const HA_TOKEN = import.meta.env.VITE_HA_TOKEN
+import { config } from '../config/runtime'
 
 type ConnectionState = 'disconnected' | 'connecting' | 'authenticating' | 'connected'
 
@@ -43,7 +41,7 @@ export function useHomeAssistant(): UseHomeAssistantReturn {
     if (wsRef.current?.readyState === WebSocket.OPEN) return
 
     setConnectionState('connecting')
-    const ws = new WebSocket(HA_WS_URL)
+    const ws = new WebSocket(config.HA_WS_URL)
     wsRef.current = ws
 
     ws.onopen = () => {
@@ -58,7 +56,7 @@ export function useHomeAssistant(): UseHomeAssistantReturn {
           setConnectionState('authenticating')
           const authMessage: HassAuthMessage = {
             type: 'auth',
-            access_token: HA_TOKEN,
+            access_token: config.HA_TOKEN,
           }
           ws.send(JSON.stringify(authMessage))
           break

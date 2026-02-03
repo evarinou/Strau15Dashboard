@@ -1,10 +1,7 @@
 import { createContext, useContext, type ReactNode } from 'react'
 import { useHomeAssistant } from '../hooks/useHomeAssistant'
 import type { HassEntity, HassServiceCall } from '../types/homeassistant'
-
-// Home Assistant base URL and token for image proxy
-const HA_URL = import.meta.env.VITE_HA_URL || 'http://strau15machine:8123'
-const HA_TOKEN = import.meta.env.VITE_HA_TOKEN || ''
+import { config } from '../config/runtime'
 
 interface HomeAssistantContextValue {
   entities: Map<string, HassEntity>
@@ -918,24 +915,24 @@ export function useVacuumExtended(entityId: string): VacuumExtendedState {
     const accessToken = mapEntity.attributes?.access_token as string | undefined
 
     if (entityPicture) {
-      // If entity_picture is a relative path, prepend HA_URL
+      // If entity_picture is a relative path, prepend config.HA_URL
       if (entityPicture.startsWith('/')) {
         // Check if URL already has query params
         const separator = entityPicture.includes('?') ? '&' : '?'
         // Use entity's access_token if available, otherwise use global token
-        const token = accessToken || HA_TOKEN
+        const token = accessToken || config.HA_TOKEN
         mapImageUrl = token
-          ? `${HA_URL}${entityPicture}${separator}token=${token}`
-          : `${HA_URL}${entityPicture}`
+          ? `${config.HA_URL}${entityPicture}${separator}token=${token}`
+          : `${config.HA_URL}${entityPicture}`
       } else {
         mapImageUrl = entityPicture
       }
     } else if (mapEntityId?.startsWith('image.')) {
       // For image.* entities without entity_picture, use image proxy with auth
-      const token = accessToken || HA_TOKEN
+      const token = accessToken || config.HA_TOKEN
       mapImageUrl = token
-        ? `${HA_URL}/api/image_proxy/${mapEntityId}?token=${token}`
-        : `${HA_URL}/api/image_proxy/${mapEntityId}`
+        ? `${config.HA_URL}/api/image_proxy/${mapEntityId}?token=${token}`
+        : `${config.HA_URL}/api/image_proxy/${mapEntityId}`
     }
   }
 
