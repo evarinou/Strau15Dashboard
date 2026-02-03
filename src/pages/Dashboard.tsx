@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { Lightbulb, LightbulbOff, Moon, Check } from 'lucide-react'
 import { clsx } from 'clsx'
 import { Card, CardHeader, CardTitle } from '../components/ui/Card'
-import { TaskWidget, LeaderboardWidget, ScriptWidget, SceneWidget, VacuumWidget, WeatherWidget, WasteCollectionWidget, AlarmWidget } from '../components/widgets'
+import { TaskWidget, LeaderboardWidget, ScriptWidget, SceneWidget, WeatherHero, WasteCollectionWidget, AlarmWidget } from '../components/widgets'
 import { useTodayInstances } from '../hooks/useChoreQuest'
-import { useHA } from '../contexts/HomeAssistantContext'
+import { useHA, useWeather } from '../contexts/HomeAssistantContext'
 import { useCurrentUser } from '../contexts/UserContext'
 import type { CompletionResponse } from '../types/chorequest'
 import type { User } from '../types/chorequest'
@@ -54,6 +55,145 @@ function generateConfetti(count: number) {
     size: 6 + Math.random() * 6,
     rotation: Math.random() * 360,
   }))
+}
+
+// Generate weather particles
+function useWeatherParticles(count: number) {
+  return useMemo(() =>
+    Array.from({ length: count }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 2,
+      duration: 0.8 + Math.random() * 0.6,
+      size: 0.3 + Math.random() * 0.4,
+    })),
+    [count]
+  )
+}
+
+// Weather effect component for hero background
+function HeroWeatherEffect({ condition }: { condition: string }) {
+  const rainParticles = useWeatherParticles(20)
+  const snowParticles = useWeatherParticles(15)
+
+  switch (condition) {
+    case 'sunny':
+      return (
+        <div className="absolute top-2 right-8 w-24 h-24 animate-sun-rotate pointer-events-none">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute left-1/2 top-1/2 w-1 h-10 bg-gradient-to-b from-yellow-400/40 to-transparent rounded-full animate-sun-rays"
+              style={{
+                transform: `rotate(${i * 45}deg) translateY(-50%)`,
+                transformOrigin: 'center bottom',
+                animationDelay: `${i * 0.1}s`,
+              }}
+            />
+          ))}
+          <div
+            className="absolute left-1/2 top-1/2 w-12 h-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-400/20"
+            style={{ boxShadow: '0 0 40px oklch(0.85 0.2 85 / 0.4)' }}
+          />
+        </div>
+      )
+
+    case 'rainy':
+    case 'pouring':
+      return (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {rainParticles.map((p) => (
+            <div
+              key={p.id}
+              className="absolute w-0.5 rounded-full bg-gradient-to-b from-cyan-400/50 to-cyan-400/10 animate-rain"
+              style={{
+                left: `${p.left}%`,
+                height: `${12 + p.size * 10}px`,
+                animationDelay: `${p.delay}s`,
+                animationDuration: `${p.duration}s`,
+              }}
+            />
+          ))}
+        </div>
+      )
+
+    case 'snowy':
+    case 'snowy-rainy':
+      return (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {snowParticles.map((p) => (
+            <div
+              key={p.id}
+              className="absolute rounded-full bg-white/60 animate-snow"
+              style={{
+                left: `${p.left}%`,
+                width: `${4 + p.size * 5}px`,
+                height: `${4 + p.size * 5}px`,
+                animationDelay: `${p.delay}s`,
+                animationDuration: `${2.5 + p.duration}s`,
+                boxShadow: '0 0 6px oklch(0.95 0.02 250 / 0.4)',
+              }}
+            />
+          ))}
+        </div>
+      )
+
+    case 'lightning':
+    case 'lightning-rainy':
+      return (
+        <>
+          <div
+            className="absolute inset-0 bg-yellow-100/0 animate-lightning pointer-events-none rounded-2xl"
+            style={{ animationDelay: `${Math.random() * 2}s` }}
+          />
+          {condition === 'lightning-rainy' && (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {rainParticles.map((p) => (
+                <div
+                  key={p.id}
+                  className="absolute w-0.5 rounded-full bg-gradient-to-b from-cyan-400/50 to-cyan-400/10 animate-rain"
+                  style={{
+                    left: `${p.left}%`,
+                    height: `${12 + p.size * 10}px`,
+                    animationDelay: `${p.delay}s`,
+                    animationDuration: `${p.duration}s`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )
+
+    case 'cloudy':
+    case 'partlycloudy':
+      return (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute top-4 left-8 w-16 h-8 bg-gray-400/15 rounded-full animate-cloud-drift blur-sm"
+            style={{ animationDelay: '0s' }}
+          />
+          <div
+            className="absolute top-8 right-16 w-12 h-6 bg-gray-400/10 rounded-full animate-cloud-drift blur-sm"
+            style={{ animationDelay: '3s' }}
+          />
+        </div>
+      )
+
+    case 'fog':
+      return (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-2xl">
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-gray-400/15 to-transparent animate-fog-wave" />
+          <div
+            className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-gray-400/10 to-transparent animate-fog-wave"
+            style={{ animationDelay: '2s' }}
+          />
+        </div>
+      )
+
+    default:
+      return null
+  }
 }
 
 // Enhanced Celebration overlay for completed tasks
@@ -173,7 +313,7 @@ function CelebrationOverlay({
   )
 }
 
-// User avatar button component
+// User avatar button component - more compact version
 function UserAvatar({
   user,
   isSelected,
@@ -191,8 +331,8 @@ function UserAvatar({
     <button
       onClick={onClick}
       className={clsx(
-        'relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300',
-        'border',
+        'relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300',
+        'border touch-target haptic-feedback',
         isSelected
           ? 'bg-accent/15 border-accent/50 border-glow-accent'
           : 'bg-surface-elevated/50 border-border/30 hover:bg-surface-hover hover:border-border/50'
@@ -201,14 +341,14 @@ function UserAvatar({
       {/* Avatar */}
       <div
         className={clsx(
-          'relative w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300',
+          'relative w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300',
           isSelected
             ? 'bg-accent text-white'
             : 'bg-surface-hover text-text-secondary'
         )}
         style={{
           boxShadow: isSelected
-            ? '0 0 15px oklch(0.623 0.214 259.13 / 0.5)'
+            ? '0 0 12px oklch(0.623 0.214 259.13 / 0.5)'
             : 'none',
         }}
       >
@@ -216,27 +356,24 @@ function UserAvatar({
         {/* Check mark overlay */}
         {isSelected && (
           <div
-            className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-success flex items-center justify-center"
+            className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-success flex items-center justify-center"
             style={{
-              boxShadow: '0 0 8px oklch(0.627 0.194 149.21 / 0.5)',
+              boxShadow: '0 0 6px oklch(0.627 0.194 149.21 / 0.5)',
             }}
           >
-            <Check className="w-3 h-3 text-white" />
+            <Check className="w-2.5 h-2.5 text-white" />
           </div>
         )}
       </div>
-      {/* Name */}
-      <div className="text-left">
+      {/* Name - hidden on mobile */}
+      <div className="text-left hidden sm:block">
         <p
           className={clsx(
             'text-sm font-medium transition-all duration-300',
             isSelected && 'text-accent text-glow-accent'
           )}
         >
-          {user.display_name || user.username}
-        </p>
-        <p className="text-xs text-text-secondary">
-          {isSelected ? 'Aktiv' : 'Wechseln'}
+          {user.display_name?.split(' ')[0] || user.username}
         </p>
       </div>
     </button>
@@ -248,6 +385,7 @@ export function Dashboard() {
   const { currentUser, users, setCurrentUser } = useCurrentUser()
   const { data: todayInstances = [], isLoading: tasksLoading } = useTodayInstances()
   const [celebration, setCelebration] = useState<CompletionResponse | null>(null)
+  const weather = useWeather('weather.forecast_home')
 
   // Count active lights
   const activeLights = Array.from(entities.values()).filter(
@@ -257,54 +395,72 @@ export function Dashboard() {
   const animatedLightCount = useAnimatedCounter(activeLights, 800)
 
   // Filter pending tasks
-  const pendingTasks = todayInstances.filter((t) => t.status === 'pending').slice(0, 5)
+  const pendingTasks = todayInstances.filter((t) => t.status === 'pending').slice(0, 4)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {celebration && (
         <CelebrationOverlay response={celebration} onClose={() => setCelebration(null)} />
       )}
 
-      {/* Welcome with User Switcher */}
+      {/* Hero Section with Weather Effect */}
       <div className="animate-entrance">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">
-              Hallo, {currentUser?.display_name || currentUser?.username || 'Gast'}!
-            </h1>
-            <p className="text-text-secondary">
-              {new Date().toLocaleDateString('de-DE', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-              })}
-            </p>
-          </div>
+        <div
+          className="relative rounded-2xl overflow-hidden p-4 sm:p-5 glass border border-border/30"
+          style={{
+            background: 'linear-gradient(135deg, oklch(0.205 0.015 285.82 / 0.8) 0%, oklch(0.145 0.014 285.82 / 0.9) 100%)',
+          }}
+        >
+          {/* Weather animation effect */}
+          <HeroWeatherEffect condition={weather.condition} />
 
-          {/* User Switcher */}
-          <div className="flex gap-2">
-            {users.map((user) => (
-              <UserAvatar
-                key={user.id}
-                user={user}
-                isSelected={currentUser?.id === user.id}
-                onClick={() => setCurrentUser(user)}
-              />
-            ))}
+          {/* Gradient accent in corner */}
+          <div
+            className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle at top right, oklch(0.623 0.214 259.13 / 0.1) 0%, transparent 70%)',
+            }}
+          />
+
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            {/* Left: Weather + Greeting */}
+            <div className="flex items-center gap-4">
+              {/* Weather Hero */}
+              <WeatherHero entityId="weather.forecast_home" />
+
+              {/* Greeting */}
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold">
+                  Hallo, {currentUser?.display_name?.split(' ')[0] || currentUser?.username || 'Gast'}!
+                </h1>
+                <p className="text-text-secondary text-sm">
+                  {new Date().toLocaleDateString('de-DE', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                  })}
+                </p>
+              </div>
+            </div>
+
+            {/* Right: User Switcher */}
+            <div className="flex gap-2">
+              {users.map((user) => (
+                <UserAvatar
+                  key={user.id}
+                  user={user}
+                  isSelected={currentUser?.id === user.id}
+                  onClick={() => setCurrentUser(user)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions - staggered entrance */}
+      {/* Quick Actions */}
       <section className="animate-entrance animate-entrance-delay-1">
-        <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-          <span
-            className="w-1 h-5 bg-accent rounded-full"
-            style={{ boxShadow: '0 0 8px oklch(0.623 0.214 259.13 / 0.5)' }}
-          />
-          Schnellzugriff
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <ScriptWidget
             entityId="script.alle_hauptlichter_ein"
             icon={<Lightbulb className="w-5 h-5" />}
@@ -321,145 +477,126 @@ export function Dashboard() {
         </div>
       </section>
 
-      {/* Main grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      {/* Main grid - optimized for no-scroll */}
+      <div className="grid lg:grid-cols-3 gap-4">
         {/* Tasks column */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Today's Tasks */}
-          <section className="animate-entrance animate-entrance-delay-2">
-            <Card>
-              <CardHeader>
-                <CardTitle glow>Heutige Aufgaben</CardTitle>
-                {pendingTasks.length > 0 && (
-                  <span
-                    className="relative text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full"
-                    style={{
-                      boxShadow: '0 0 10px oklch(0.623 0.214 259.13 / 0.3)',
-                    }}
-                  >
-                    {pendingTasks.length} offen
-                    <span className="absolute inset-0 rounded-full animate-glow-pulse opacity-50" />
-                  </span>
-                )}
-              </CardHeader>
-
-              {tasksLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="h-16 bg-surface-hover rounded-lg animate-shimmer"
-                      style={{ animationDelay: `${i * 100}ms` }}
-                    />
-                  ))}
-                </div>
-              ) : pendingTasks.length === 0 ? (
-                <div className="text-center py-8 text-text-secondary">
-                  <div
-                    className="text-5xl mb-3 animate-float"
-                    style={{
-                      filter: 'drop-shadow(0 0 10px oklch(0.627 0.194 149.21 / 0.5))',
-                    }}
-                  >
-                    ✨
-                  </div>
-                  <p className="text-glow-success">Alle Aufgaben erledigt!</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {pendingTasks.map((instance, index) => (
-                    <TaskWidget
-                      key={instance.id}
-                      instance={instance}
-                      onComplete={setCelebration}
-                      entrance
-                      entranceDelay={index + 1}
-                    />
-                  ))}
-                </div>
+        <div className="lg:col-span-2">
+          <Card className="animate-entrance animate-entrance-delay-2">
+            <CardHeader>
+              <CardTitle glow>Heutige Aufgaben</CardTitle>
+              {pendingTasks.length > 0 && (
+                <span
+                  className="relative text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full"
+                  style={{
+                    boxShadow: '0 0 10px oklch(0.623 0.214 259.13 / 0.3)',
+                  }}
+                >
+                  {pendingTasks.length} offen
+                </span>
               )}
-            </Card>
-          </section>
+            </CardHeader>
 
-          {/* Vacuum */}
-          <section className="animate-entrance animate-entrance-delay-4">
-            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <span
-                className="w-1 h-5 bg-accent rounded-full"
-                style={{ boxShadow: '0 0 8px oklch(0.623 0.214 259.13 / 0.5)' }}
-              />
-              Staubsauger
-            </h2>
-            <VacuumWidget entityId="vacuum.roborock_s7" entrance entranceDelay={5} />
-          </section>
+            {tasksLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-14 bg-surface-hover rounded-lg animate-shimmer"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  />
+                ))}
+              </div>
+            ) : pendingTasks.length === 0 ? (
+              <div className="text-center py-6 text-text-secondary">
+                <div
+                  className="text-4xl mb-2 animate-float"
+                  style={{
+                    filter: 'drop-shadow(0 0 10px oklch(0.627 0.194 149.21 / 0.5))',
+                  }}
+                >
+                  ✨
+                </div>
+                <p className="text-glow-success text-sm">Alle Aufgaben erledigt!</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {pendingTasks.map((instance, index) => (
+                  <TaskWidget
+                    key={instance.id}
+                    instance={instance}
+                    onComplete={setCelebration}
+                    entrance
+                    entranceDelay={index + 1}
+                    compact
+                  />
+                ))}
+              </div>
+            )}
+          </Card>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Weather */}
-          <WeatherWidget
-            entityId="weather.forecast_home"
-            entrance
-            entranceDelay={3}
-          />
-
-          {/* Waste Collection */}
-          <WasteCollectionWidget
-            entityId="calendar.landkreis_kronach"
-            entrance
-            entranceDelay={4}
-          />
-
-          {/* Alarm/Wecker */}
-          <AlarmWidget
-            variant="compact"
-            entrance
-            entranceDelay={5}
-          />
-
-          {/* Light status */}
-          <Card entrance entranceDelay={6}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2" glow>
-                <Lightbulb
-                  className={clsx(
-                    'w-4 h-4 transition-all duration-300',
-                    activeLights > 0 && 'text-warning icon-glow-warning'
-                  )}
-                />
-                Lichter
-              </CardTitle>
-            </CardHeader>
-            <div className="text-center py-4">
-              <p
-                className={clsx(
-                  'text-5xl font-bold tabular-nums transition-all duration-300',
-                  activeLights > 0 ? 'text-warning text-glow-warning' : 'text-accent'
-                )}
-              >
-                {animatedLightCount}
-              </p>
-              <p className="text-sm text-text-secondary mt-1">
-                {activeLights === 1 ? 'Licht eingeschaltet' : 'Lichter eingeschaltet'}
-              </p>
-              {/* Glow indicator bar */}
-              <div className="mt-4 h-1 bg-surface-hover rounded-full overflow-hidden">
+        {/* Sidebar - compact widgets in 2x2 grid */}
+        <div className="space-y-3">
+          {/* Row 1: Lights + Leaderboard */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Light status - mini */}
+            <Card entrance entranceDelay={3} className="!p-3">
+              <div className="flex items-center gap-3">
                 <div
-                  className="h-full bg-warning rounded-full transition-all duration-500"
+                  className={clsx(
+                    'w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300',
+                    activeLights > 0 ? 'bg-warning/20' : 'bg-surface-hover'
+                  )}
                   style={{
-                    width: `${Math.min((activeLights / 10) * 100, 100)}%`,
-                    boxShadow:
-                      activeLights > 0
-                        ? '0 0 10px oklch(0.769 0.188 70.08 / 0.6)'
-                        : 'none',
+                    boxShadow: activeLights > 0
+                      ? '0 0 15px oklch(0.769 0.188 70.08 / 0.3)'
+                      : 'none',
                   }}
-                />
+                >
+                  <Lightbulb
+                    className={clsx(
+                      'w-5 h-5 transition-all duration-300',
+                      activeLights > 0 ? 'text-warning icon-glow-warning' : 'text-text-secondary'
+                    )}
+                  />
+                </div>
+                <div>
+                  <p
+                    className={clsx(
+                      'text-lg font-bold tabular-nums transition-all duration-300',
+                      activeLights > 0 ? 'text-warning text-glow-warning' : 'text-text-primary'
+                    )}
+                  >
+                    {animatedLightCount}
+                  </p>
+                  <p className="text-xs text-text-secondary">Lichter an</p>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
 
-          {/* Leaderboard */}
-          <LeaderboardWidget entrance entranceDelay={7} />
+            {/* Leaderboard - compact */}
+            <LeaderboardWidget entrance entranceDelay={4} compact />
+          </div>
+
+          {/* Row 2: Waste + Alarm */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Waste Collection - mini */}
+            <WasteCollectionWidget
+              entityId="calendar.landkreis_kronach"
+              entrance
+              entranceDelay={5}
+              variant="mini"
+            />
+
+            {/* Alarm - mini (links to bedroom for full settings) */}
+            <Link to="/room/schlafzimmer" className="block">
+              <AlarmWidget
+                variant="mini"
+                entrance
+                entranceDelay={6}
+              />
+            </Link>
+          </div>
         </div>
       </div>
     </div>

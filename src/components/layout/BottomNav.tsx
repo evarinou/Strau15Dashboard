@@ -1,10 +1,9 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Lightbulb, Music, ClipboardList, DoorOpen } from 'lucide-react'
+import { Home, Music, ClipboardList, DoorOpen } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const navItems = [
   { to: '/', icon: Home, label: 'Home' },
-  { to: '/lights', icon: Lightbulb, label: 'Lichter' },
   { to: '/music', icon: Music, label: 'Musik' },
   { to: '/tasks', icon: ClipboardList, label: 'Aufgaben' },
   { to: '/rooms', icon: DoorOpen, label: 'Räume' },

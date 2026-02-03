@@ -1,5 +1,18 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import {
+  Plus,
+  Home,
+  Sofa,
+  UtensilsCrossed,
+  Bed,
+  Bath,
+  BookOpen,
+  Hammer,
+  Sun,
+  Printer,
+  DoorOpen,
+} from 'lucide-react'
+import { clsx } from 'clsx'
 import { Card, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { TaskWidget, LeaderboardWidget } from '../components/widgets'
@@ -7,6 +20,20 @@ import { useTodayInstances, useRooms, useUserProgress } from '../hooks/useChoreQ
 import { useCurrentUser } from '../contexts/UserContext'
 import { mdiToEmoji } from '../utils/mdiToEmoji'
 import type { CompletionResponse } from '../types/chorequest'
+
+const roomIcons: Record<string, typeof Sofa> = {
+  wohnzimmer: Sofa,
+  kuche: UtensilsCrossed,
+  schlafzimmer: Bed,
+  bad: Bath,
+  bucherzimmer: BookOpen,
+  werkstatt: Hammer,
+  innenhof: Sun,
+  '3d_drucker_zimmer': Printer,
+  ankleide: DoorOpen,
+  lukas_buro: DoorOpen,
+  esszimmer: UtensilsCrossed,
+}
 
 function ProgressBar({ value, max, label }: { value: number; max: number; label: string }) {
   const percent = Math.min((value / max) * 100, 100)
@@ -85,26 +112,41 @@ export function Tasks() {
       </div>
 
       {/* Room Filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        <Button
-          variant={selectedRoom === null ? 'primary' : 'secondary'}
-          size="sm"
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        <button
           onClick={() => setSelectedRoom(null)}
+          className={clsx(
+            'flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap transition-all duration-200',
+            'border min-w-fit touch-target',
+            selectedRoom === null
+              ? 'bg-accent/15 border-accent/50 text-accent'
+              : 'bg-surface-elevated border-border/30 text-text-secondary hover:bg-surface-hover hover:border-border/50'
+          )}
         >
-          Alle
-        </Button>
+          <Home className="w-4 h-4 flex-shrink-0" />
+          <span className="text-sm font-medium">Alle</span>
+        </button>
         {rooms
           .filter((r) => r.ha_area_id !== 'wecker')
-          .map((room) => (
-            <Button
-              key={room.id}
-              variant={selectedRoom === room.id ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => setSelectedRoom(room.id)}
-            >
-              {room.name}
-            </Button>
-          ))}
+          .map((room) => {
+            const Icon = roomIcons[room.ha_area_id || ''] || DoorOpen
+            return (
+              <button
+                key={room.id}
+                onClick={() => setSelectedRoom(room.id)}
+                className={clsx(
+                  'flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap transition-all duration-200',
+                  'border min-w-fit touch-target',
+                  selectedRoom === room.id
+                    ? 'bg-accent/15 border-accent/50 text-accent'
+                    : 'bg-surface-elevated border-border/30 text-text-secondary hover:bg-surface-hover hover:border-border/50'
+                )}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                <span className="text-sm font-medium">{room.name}</span>
+              </button>
+            )
+          })}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">

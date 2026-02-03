@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
   Home,
-  Lightbulb,
   Music,
   ClipboardList,
   DoorOpen,
@@ -19,7 +18,6 @@ import { useRooms } from '../../hooks/useChoreQuest'
 
 const mainNavItems = [
   { to: '/', icon: Home, label: 'Übersicht' },
-  { to: '/lights', icon: Lightbulb, label: 'Lichter' },
   { to: '/music', icon: Music, label: 'Musik' },
   { to: '/tasks', icon: ClipboardList, label: 'Aufgaben' },
 ]

@@ -42,29 +42,61 @@ function useAnimatedCounter(target: number, duration: number = 1000) {
 interface LeaderboardWidgetProps {
   entrance?: boolean
   entranceDelay?: number
+  compact?: boolean
 }
 
 export function LeaderboardWidget({
   entrance = false,
   entranceDelay = 0,
+  compact = false,
 }: LeaderboardWidgetProps) {
   const { data: leaderboard = [], isLoading } = useWeeklyLeaderboard()
   const { currentUser } = useCurrentUser()
 
   if (isLoading) {
     return (
-      <Card entrance={entrance} entranceDelay={entranceDelay}>
-        <CardHeader>
-          <CardTitle>Wochenrangliste</CardTitle>
-        </CardHeader>
-        <div className="space-y-3">
+      <Card entrance={entrance} entranceDelay={entranceDelay} className={compact ? '!p-3' : ''}>
+        {!compact && (
+          <CardHeader>
+            <CardTitle>Wochenrangliste</CardTitle>
+          </CardHeader>
+        )}
+        <div className="space-y-2">
           {[1, 2].map((i) => (
             <div
               key={i}
-              className="h-12 bg-surface-hover rounded-lg animate-shimmer"
+              className={clsx('bg-surface-hover rounded-lg animate-shimmer', compact ? 'h-8' : 'h-12')}
               style={{ animationDelay: `${i * 100}ms` }}
             />
           ))}
+        </div>
+      </Card>
+    )
+  }
+
+  // Compact mode: show only leader or current user's ranking
+  if (compact) {
+    const leader = leaderboard[0]
+    if (!leader) return null
+
+    return (
+      <Card entrance={entrance} entranceDelay={entranceDelay} className="!p-3">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center"
+            style={{ boxShadow: '0 0 12px oklch(0.769 0.188 70.08 / 0.3)' }}
+          >
+            <Trophy className="w-5 h-5 text-warning icon-glow-warning" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate text-glow-warning">
+              {leader.display_name?.split(' ')[0] || leader.username}
+            </p>
+            <p className="text-xs text-text-secondary flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" />
+              <span className="text-warning font-medium">{leader.weekly_points}</span> Punkte
+            </p>
+          </div>
         </div>
       </Card>
     )

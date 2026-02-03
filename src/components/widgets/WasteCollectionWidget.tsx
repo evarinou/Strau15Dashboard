@@ -7,6 +7,7 @@ interface WasteCollectionWidgetProps {
   entityId: string
   entrance?: boolean
   entranceDelay?: number
+  variant?: 'mini' | 'compact' | 'full'
 }
 
 // Configuration for waste types
@@ -59,20 +60,25 @@ export function WasteCollectionWidget({
   entityId,
   entrance = false,
   entranceDelay = 0,
+  variant = 'full',
 }: WasteCollectionWidgetProps) {
   const { events, nextPickup, hasSoonPickup, isAvailable } = useWasteCalendar(entityId)
 
+  const isCompact = variant === 'compact' || variant === 'mini'
+
   if (!isAvailable) {
     return (
-      <Card entrance={entrance} entranceDelay={entranceDelay}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            Müllabfuhr
-          </CardTitle>
-        </CardHeader>
-        <div className="text-center py-4 text-text-secondary">
-          <Trash2 className="w-8 h-8 mx-auto mb-2 opacity-50" />
+      <Card entrance={entrance} entranceDelay={entranceDelay} className={isCompact ? '!p-3' : ''}>
+        {variant === 'full' && (
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Müllabfuhr
+            </CardTitle>
+          </CardHeader>
+        )}
+        <div className={clsx('text-center text-text-secondary', isCompact ? 'py-2' : 'py-4')}>
+          <Trash2 className={clsx('mx-auto mb-2 opacity-50', isCompact ? 'w-6 h-6' : 'w-8 h-8')} />
           <p className="text-sm">Nicht verfügbar</p>
         </div>
       </Card>
@@ -81,15 +87,17 @@ export function WasteCollectionWidget({
 
   if (!nextPickup) {
     return (
-      <Card entrance={entrance} entranceDelay={entranceDelay}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2" glow>
-            <Calendar className="w-4 h-4" />
-            Müllabfuhr
-          </CardTitle>
-        </CardHeader>
-        <div className="text-center py-4 text-text-secondary">
-          <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
+      <Card entrance={entrance} entranceDelay={entranceDelay} className={isCompact ? '!p-3' : ''}>
+        {variant === 'full' && (
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2" glow>
+              <Calendar className="w-4 h-4" />
+              Müllabfuhr
+            </CardTitle>
+          </CardHeader>
+        )}
+        <div className={clsx('text-center text-text-secondary', isCompact ? 'py-2' : 'py-4')}>
+          <Calendar className={clsx('mx-auto mb-2 opacity-50', isCompact ? 'w-6 h-6' : 'w-8 h-8')} />
           <p className="text-sm">Keine Termine</p>
         </div>
       </Card>
@@ -97,6 +105,92 @@ export function WasteCollectionWidget({
   }
 
   const config = WASTE_CONFIG[nextPickup.type]
+  const NextIcon = config.icon
+
+  // Mini mode: minimal info for 2x2 grid
+  if (variant === 'mini') {
+    return (
+      <Card
+        entrance={entrance}
+        entranceDelay={entranceDelay}
+        className="!p-3"
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={clsx('w-10 h-10 rounded-lg flex items-center justify-center', config.bgColor)}
+            style={{
+              boxShadow: nextPickup.isSoon ? `0 0 10px ${config.glowColor}` : undefined,
+            }}
+          >
+            <NextIcon className={clsx('w-5 h-5', config.color, nextPickup.isSoon && 'animate-float')} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p
+              className={clsx(
+                'text-lg font-bold tabular-nums',
+                nextPickup.isToday && 'text-danger',
+                nextPickup.isTomorrow && !nextPickup.isToday && 'text-warning',
+                !nextPickup.isSoon && 'text-text-primary'
+              )}
+            >
+              {nextPickup.isToday ? 'Heute' : nextPickup.isTomorrow ? 'Morgen' : formatDaysUntil(nextPickup.daysUntil)}
+            </p>
+            <p className="text-xs text-text-secondary truncate">{nextPickup.label}</p>
+          </div>
+        </div>
+      </Card>
+    )
+  }
+
+  // Compact mode: show only next pickup
+  if (variant === 'compact') {
+    return (
+      <Card
+        entrance={entrance}
+        entranceDelay={entranceDelay}
+        className={clsx(
+          '!p-3 overflow-hidden transition-all duration-300',
+          hasSoonPickup && 'border-warning/40'
+        )}
+        style={{
+          boxShadow: hasSoonPickup ? `0 0 15px oklch(0.769 0.188 70.08 / 0.15)` : undefined,
+        }}
+      >
+        {nextPickup.isSoon && (
+          <div
+            className="absolute inset-0 opacity-20 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle at 50% 50%, ${config.glowColor}, transparent 70%)`,
+            }}
+          />
+        )}
+        <div className="relative z-10 flex items-center gap-3">
+          <div
+            className={clsx('w-10 h-10 rounded-lg flex items-center justify-center', config.bgColor)}
+            style={{
+              boxShadow: nextPickup.isSoon ? `0 0 10px ${config.glowColor}` : undefined,
+            }}
+          >
+            <NextIcon className={clsx('w-5 h-5', config.color, nextPickup.isSoon && 'animate-float')} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p
+              className={clsx(
+                'text-sm font-medium truncate',
+                nextPickup.isToday && 'text-danger',
+                nextPickup.isTomorrow && !nextPickup.isToday && 'text-warning'
+              )}
+            >
+              {nextPickup.label}
+            </p>
+            <p className="text-xs text-text-secondary">
+              {nextPickup.isToday ? 'Heute' : nextPickup.isTomorrow ? 'Morgen' : formatDate(nextPickup.date)}
+            </p>
+          </div>
+        </div>
+      </Card>
+    )
+  }
 
   return (
     <Card

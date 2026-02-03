@@ -262,6 +262,7 @@ export function useMediaPlayer(entityId: string) {
     mediaTitle: attrs.media_title as string | undefined,
     mediaArtist: attrs.media_artist as string | undefined,
     friendlyName: attrs.friendly_name as string | undefined,
+    entityPicture: attrs.entity_picture as string | undefined,
     play,
     pause,
     stop,

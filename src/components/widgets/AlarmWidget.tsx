@@ -6,7 +6,7 @@ import { Toggle } from '../ui/Toggle'
 import { useAlarm, type AlarmMode } from '../../contexts/HomeAssistantContext'
 
 interface AlarmWidgetProps {
-  variant?: 'compact' | 'full'
+  variant?: 'mini' | 'compact' | 'full'
   entrance?: boolean
   entranceDelay?: number
 }
@@ -100,6 +100,48 @@ export function AlarmWidget({
   const modeConfig = MODE_CONFIG[alarm.mode]
   const ModeIcon = modeConfig.icon
   const isActive = alarm.isEnabled && alarm.mode !== 'Aus'
+
+  // Mini variant for dashboard 2x2 grid
+  if (variant === 'mini') {
+    return (
+      <Card
+        entrance={entrance}
+        entranceDelay={entranceDelay}
+        className="!p-3"
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={clsx(
+              'w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300',
+              isActive ? 'bg-accent/20' : 'bg-surface-hover'
+            )}
+            style={{
+              boxShadow: isActive ? '0 0 12px oklch(0.623 0.214 259.13 / 0.3)' : undefined,
+            }}
+          >
+            {isActive ? (
+              <Bell className={clsx('w-5 h-5 text-accent', isActive && 'animate-float')} />
+            ) : (
+              <BellOff className="w-5 h-5 text-text-secondary" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p
+              className={clsx(
+                'text-lg font-bold font-mono tabular-nums transition-all duration-300',
+                isActive ? 'text-text-primary' : 'text-text-secondary'
+              )}
+            >
+              {alarm.nextAlarmTime || '--:--'}
+            </p>
+            <p className="text-xs text-text-secondary truncate">
+              {isActive ? modeConfig.label : 'Wecker aus'}
+            </p>
+          </div>
+        </div>
+      </Card>
+    )
+  }
 
   // Compact variant for dashboard sidebar
   if (variant === 'compact') {

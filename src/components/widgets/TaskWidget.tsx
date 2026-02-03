@@ -12,6 +12,7 @@ interface TaskWidgetProps {
   onComplete?: (response: CompletionResponse) => void
   entrance?: boolean
   entranceDelay?: number
+  compact?: boolean
 }
 
 // Generate random confetti particles
@@ -31,6 +32,7 @@ export function TaskWidget({
   onComplete,
   entrance = false,
   entranceDelay = 0,
+  compact = false,
 }: TaskWidgetProps) {
   const { currentUser } = useCurrentUser()
   const completeTask = useCompleteInstance()
@@ -126,13 +128,13 @@ export function TaskWidget({
             {instance.task.title}
           </p>
 
-          {instance.task.description && (
+          {!compact && instance.task.description && (
             <p className="text-xs text-text-secondary mt-0.5 line-clamp-2">
               {instance.task.description}
             </p>
           )}
 
-          <div className="flex items-center gap-3 mt-2 text-xs text-text-secondary">
+          <div className={clsx('flex items-center gap-3 text-xs text-text-secondary', compact ? 'mt-1' : 'mt-2')}>
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {instance.task.estimated_minutes} Min.
@@ -155,7 +157,7 @@ export function TaskWidget({
                 <span className="absolute inset-0 rounded-full animate-shimmer" />
               )}
             </span>
-            {instance.assigned_user && (
+            {!compact && instance.assigned_user && (
               <span className="flex items-center gap-1">
                 <User className="w-3 h-3" />
                 {instance.assigned_user.display_name || instance.assigned_user.username}
