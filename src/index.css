@@ -1,0 +1,583 @@
+@import "tailwindcss";
+
+@theme {
+  /* Base Colors */
+  --color-surface: oklch(0.145 0.014 285.82);
+  --color-surface-elevated: oklch(0.205 0.015 285.82);
+  --color-surface-hover: oklch(0.269 0.015 285.82);
+  --color-border: oklch(0.371 0.017 285.82);
+  --color-text-primary: oklch(0.985 0 0);
+  --color-text-secondary: oklch(0.708 0.014 285.82);
+  --color-accent: oklch(0.623 0.214 259.13);
+  --color-accent-hover: oklch(0.546 0.214 259.13);
+  --color-success: oklch(0.627 0.194 149.21);
+  --color-warning: oklch(0.769 0.188 70.08);
+  --color-danger: oklch(0.577 0.245 27.33);
+
+  /* Neon Colors */
+  --color-neon-cyan: oklch(0.85 0.18 195);
+  --color-neon-magenta: oklch(0.70 0.25 330);
+  --color-neon-purple: oklch(0.65 0.22 290);
+
+  /* Glass Effects */
+  --glass-bg: oklch(0.205 0.015 285.82 / 0.6);
+  --glass-bg-heavy: oklch(0.205 0.015 285.82 / 0.8);
+  --glass-border: oklch(0.371 0.017 285.82 / 0.3);
+
+  /* Glow Shadows */
+  --shadow-glow-accent: 0 0 20px oklch(0.623 0.214 259.13 / 0.4);
+  --shadow-glow-accent-strong: 0 0 30px oklch(0.623 0.214 259.13 / 0.6);
+  --shadow-glow-warning: 0 0 20px oklch(0.769 0.188 70.08 / 0.4);
+  --shadow-glow-warning-strong: 0 0 30px oklch(0.769 0.188 70.08 / 0.6);
+  --shadow-glow-success: 0 0 20px oklch(0.627 0.194 149.21 / 0.4);
+  --shadow-glow-cyan: 0 0 20px oklch(0.85 0.18 195 / 0.4);
+  --shadow-glow-magenta: 0 0 20px oklch(0.70 0.25 330 / 0.4);
+  --shadow-float: 0 8px 32px oklch(0 0 0 / 0.4);
+  --shadow-float-lg: 0 16px 48px oklch(0 0 0 / 0.5);
+
+  /* Animation Easings */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  @apply bg-surface text-text-primary antialiased;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  @apply border-border;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-hover rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-border;
+}
+
+/* Touch-friendly tap highlight */
+@media (pointer: coarse) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ========================================
+   KEYFRAME ANIMATIONS
+   ======================================== */
+
+/* Pulsing glow for active elements */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px oklch(0.623 0.214 259.13 / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px oklch(0.623 0.214 259.13 / 0.5);
+  }
+}
+
+/* Breathing effect for status orbs */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.3;
+  }
+}
+
+/* Warm breathing for lights */
+@keyframes breathe-warm {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.2;
+  }
+}
+
+/* Touch/click ripple effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Slide up with fade entrance */
+@keyframes slide-up-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Success celebration burst */
+@keyframes glow-burst {
+  0% {
+    box-shadow: 0 0 0 0 oklch(0.627 0.194 149.21 / 0.7);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px oklch(0.627 0.194 149.21 / 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.627 0.194 149.21 / 0);
+  }
+}
+
+/* Scale bounce entrance */
+@keyframes scale-bounce {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Spin slow for cleaning */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Equalizer bars */
+@keyframes eq-bar {
+  0%, 100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* Confetti fall */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100%) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Count up number animation */
+@keyframes count-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Gradient border animation */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Entrance animations with stagger delays */
+.animate-entrance {
+  animation: slide-up-fade 0.5s var(--ease-spring) forwards;
+  opacity: 0;
+}
+
+.animate-entrance-delay-1 { animation-delay: 50ms; }
+.animate-entrance-delay-2 { animation-delay: 100ms; }
+.animate-entrance-delay-3 { animation-delay: 150ms; }
+.animate-entrance-delay-4 { animation-delay: 200ms; }
+.animate-entrance-delay-5 { animation-delay: 250ms; }
+.animate-entrance-delay-6 { animation-delay: 300ms; }
+.animate-entrance-delay-7 { animation-delay: 350ms; }
+.animate-entrance-delay-8 { animation-delay: 400ms; }
+
+/* Breathing animations */
+.animate-breathe {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+.animate-breathe-warm {
+  animation: breathe-warm 2.5s ease-in-out infinite;
+}
+
+/* Glow pulse */
+.animate-glow-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Glow burst (one-shot) */
+.animate-glow-burst {
+  animation: glow-burst 0.6s ease-out forwards;
+}
+
+/* Scale bounce */
+.animate-scale-bounce {
+  animation: scale-bounce 0.4s var(--ease-bounce) forwards;
+}
+
+/* Float */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Spin slow */
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+/* Shimmer effect */
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(1 0 0 / 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Count pulse */
+.animate-count-pulse {
+  animation: count-pulse 0.3s var(--ease-bounce);
+}
+
+/* Glass morphism */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-heavy {
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Text glow effects */
+.text-glow-accent {
+  text-shadow: 0 0 10px oklch(0.623 0.214 259.13 / 0.5);
+}
+
+.text-glow-warning {
+  text-shadow: 0 0 10px oklch(0.769 0.188 70.08 / 0.5);
+}
+
+.text-glow-success {
+  text-shadow: 0 0 10px oklch(0.627 0.194 149.21 / 0.5);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 10px oklch(0.85 0.18 195 / 0.5);
+}
+
+/* Border glow states */
+.border-glow-on {
+  box-shadow:
+    0 0 15px oklch(0.769 0.188 70.08 / 0.3),
+    inset 0 0 15px oklch(0.769 0.188 70.08 / 0.05);
+}
+
+.border-glow-accent {
+  box-shadow:
+    0 0 15px oklch(0.623 0.214 259.13 / 0.3),
+    inset 0 0 15px oklch(0.623 0.214 259.13 / 0.05);
+}
+
+.border-glow-success {
+  box-shadow:
+    0 0 15px oklch(0.627 0.194 149.21 / 0.3),
+    inset 0 0 15px oklch(0.627 0.194 149.21 / 0.05);
+}
+
+.border-glow-cyan {
+  box-shadow:
+    0 0 15px oklch(0.85 0.18 195 / 0.3),
+    inset 0 0 15px oklch(0.85 0.18 195 / 0.05);
+}
+
+/* Gradient border */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    oklch(0.623 0.214 259.13 / 0.5),
+    oklch(0.85 0.18 195 / 0.3),
+    oklch(0.70 0.25 330 / 0.3)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Ripple container */
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.3);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+/* Icon glow when active */
+.icon-glow-warning {
+  filter: drop-shadow(0 0 8px oklch(0.769 0.188 70.08 / 0.6));
+}
+
+.icon-glow-accent {
+  filter: drop-shadow(0 0 8px oklch(0.623 0.214 259.13 / 0.6));
+}
+
+.icon-glow-success {
+  filter: drop-shadow(0 0 8px oklch(0.627 0.194 149.21 / 0.6));
+}
+
+.icon-glow-cyan {
+  filter: drop-shadow(0 0 8px oklch(0.85 0.18 195 / 0.6));
+}
+
+/* ========================================
+   REDUCED MOTION SUPPORT
+   ======================================== */
+
+/* ========================================
+   TEMPERATURE GAUGE STYLES
+   ======================================== */
+
+/* Temperature color classes */
+.temp-cold {
+  color: oklch(0.7 0.15 240);
+}
+
+.temp-warming {
+  color: oklch(0.8 0.16 200);
+}
+
+.temp-warm {
+  color: oklch(0.85 0.18 100);
+}
+
+.temp-hot {
+  color: oklch(0.8 0.2 70);
+}
+
+.temp-very-hot {
+  color: oklch(0.65 0.25 35);
+}
+
+/* Temperature pulse animation for when target is reached */
+@keyframes temp-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+  50% {
+    filter: drop-shadow(0 0 12px currentColor);
+  }
+}
+
+.animate-temp-pulse {
+  animation: temp-pulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   VACUUM STYLES
+   ======================================== */
+
+/* Vacuum sweep animation */
+@keyframes vacuum-sweep {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(8px) rotate(2deg);
+  }
+  50% {
+    transform: translateX(0) rotate(0deg);
+  }
+  75% {
+    transform: translateX(-8px) rotate(-2deg);
+  }
+}
+
+/* Vacuum trail animation */
+@keyframes vacuum-trail {
+  0% {
+    transform: translateX(-100%) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(0) scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(100%) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Locate ping animation */
+@keyframes locate-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-vacuum-sweep {
+  animation: vacuum-sweep 2s ease-in-out infinite;
+}
+
+.animate-vacuum-trail {
+  animation: vacuum-trail 3s ease-in-out infinite;
+}
+
+.animate-locate-ping {
+  animation: locate-ping 1s ease-out infinite;
+}
+
+/* Consumable progress colors */
+.consumable-healthy {
+  background: oklch(0.627 0.194 149.21);
+}
+
+.consumable-warning {
+  background: oklch(0.769 0.188 70.08);
+}
+
+.consumable-danger {
+  background: oklch(0.577 0.245 27.33);
+}
+
+/* ========================================
+   PRINT PROGRESS STYLES
+   ======================================== */
+
+.print-progress-bar {
+  background: linear-gradient(
+    90deg,
+    oklch(0.623 0.214 259.13) 0%,
+    oklch(0.85 0.18 195) 100%
+  );
+}
+
+/* ========================================
+   REDUCED MOTION SUPPORT
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .animate-entrance,
+  .animate-breathe,
+  .animate-breathe-warm,
+  .animate-glow-pulse,
+  .animate-float,
+  .animate-spin-slow,
+  .animate-shimmer,
+  .animate-temp-pulse,
+  .animate-vacuum-sweep,
+  .animate-vacuum-trail,
+  .animate-locate-ping {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
