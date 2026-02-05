@@ -1,39 +1,12 @@
 import { useState } from 'react'
-import {
-  Plus,
-  Home,
-  Sofa,
-  UtensilsCrossed,
-  Bed,
-  Bath,
-  BookOpen,
-  Hammer,
-  Sun,
-  Printer,
-  DoorOpen,
-} from 'lucide-react'
-import { clsx } from 'clsx'
+import { Plus, X } from 'lucide-react'
 import { Card, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { TaskWidget, LeaderboardWidget } from '../components/widgets'
-import { useTodayInstances, useRooms, useUserProgress } from '../hooks/useChoreQuest'
+import { useTodayInstances, useRooms, useUserProgress, useCreateTask } from '../hooks/useChoreQuest'
 import { useCurrentUser } from '../contexts/UserContext'
 import { mdiToEmoji } from '../utils/mdiToEmoji'
-import type { CompletionResponse } from '../types/chorequest'
-
-const roomIcons: Record<string, typeof Sofa> = {
-  wohnzimmer: Sofa,
-  kuche: UtensilsCrossed,
-  schlafzimmer: Bed,
-  bad: Bath,
-  bucherzimmer: BookOpen,
-  werkstatt: Hammer,
-  innenhof: Sun,
-  '3d_drucker_zimmer': Printer,
-  ankleide: DoorOpen,
-  lukas_buro: DoorOpen,
-  esszimmer: UtensilsCrossed,
-}
+import type { CompletionResponse, TaskCreateRequest } from '../types/chorequest'
 
 function ProgressBar({ value, max, label }: { value: number; max: number; label: string }) {
   const percent = Math.min((value / max) * 100, 100)
@@ -56,20 +29,168 @@ function ProgressBar({ value, max, label }: { value: number; max: number; label:
   )
 }
 
+function CreateTaskModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const { data: rooms = [] } = useRooms()
+  const createTask = useCreateTask()
+  const [title, setTitle] = useState('')
+  const [roomId, setRoomId] = useState<number | ''>('')
+  const [basePoints, setBasePoints] = useState(10)
+  const [estimatedMinutes, setEstimatedMinutes] = useState<number | ''>('')
+  const [recurrence, setRecurrence] = useState('once')
+
+  if (!isOpen) return null
+
+  const canSubmit = title.trim() !== '' && roomId !== '' && !createTask.isPending
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!canSubmit) return
+
+    const data: TaskCreateRequest = {
+      title: title.trim(),
+      room_id: roomId as number,
+      base_points: basePoints,
+      recurrence,
+    }
+    if (estimatedMinutes !== '') {
+      data.estimated_minutes = estimatedMinutes
+    }
+
+    createTask.mutate(data, {
+      onSuccess: () => {
+        setTitle('')
+        setRoomId('')
+        setBasePoints(10)
+        setEstimatedMinutes('')
+        setRecurrence('once')
+        onClose()
+      },
+    })
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-surface/80 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Dialog */}
+      <div className="relative z-10 w-full max-w-md p-6 rounded-2xl bg-surface-elevated border border-border/50 shadow-float-lg">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold">Neue Aufgabe</h2>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-surface-hover transition-colors">
+            <X className="w-5 h-5 text-text-secondary" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Titel *
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="z.B. Küche wischen"
+              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-accent/50 transition-colors"
+              autoFocus
+            />
+          </div>
+
+          {/* Room */}
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Raum *
+            </label>
+            <select
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value ? Number(e.target.value) : '')}
+              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary focus:outline-none focus:border-accent/50 transition-colors"
+            >
+              <option value="">Raum wählen...</option>
+              {rooms
+                .filter((r) => r.ha_area_id !== 'wecker')
+                .map((room) => (
+                  <option key={room.id} value={room.id}>
+                    {room.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* Points */}
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Punkte *
+            </label>
+            <input
+              type="number"
+              value={basePoints}
+              onChange={(e) => setBasePoints(Number(e.target.value))}
+              min={1}
+              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary focus:outline-none focus:border-accent/50 transition-colors"
+            />
+          </div>
+
+          {/* Estimated Minutes */}
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Geschätzte Minuten
+            </label>
+            <input
+              type="number"
+              value={estimatedMinutes}
+              onChange={(e) => setEstimatedMinutes(e.target.value ? Number(e.target.value) : '')}
+              min={1}
+              placeholder="Optional"
+              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-accent/50 transition-colors"
+            />
+          </div>
+
+          {/* Recurrence */}
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Wiederholung
+            </label>
+            <select
+              value={recurrence}
+              onChange={(e) => setRecurrence(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary focus:outline-none focus:border-accent/50 transition-colors"
+            >
+              <option value="once">Einmalig</option>
+              <option value="daily">Täglich</option>
+              <option value="weekly">Wöchentlich</option>
+            </select>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="ghost" className="flex-1" onClick={onClose}>
+              Abbrechen
+            </Button>
+            <Button type="submit" variant="primary" className="flex-1" disabled={!canSubmit}>
+              {createTask.isPending ? 'Erstelle...' : 'Erstellen'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export function Tasks() {
   const { currentUser } = useCurrentUser()
   const { data: instances = [], isLoading } = useTodayInstances()
-  const { data: rooms = [] } = useRooms()
   const { data: progress = [] } = useUserProgress(currentUser?.id || 0)
-  const [selectedRoom, setSelectedRoom] = useState<number | null>(null)
   const [celebration, setCelebration] = useState<CompletionResponse | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
-  const filteredInstances = selectedRoom
-    ? instances.filter((i) => i.task.room_id === selectedRoom)
-    : instances
-
-  const pendingInstances = filteredInstances.filter((i) => i.status === 'pending')
-  const completedInstances = filteredInstances.filter((i) => i.status === 'completed')
+  const pendingInstances = instances.filter((i) => i.status === 'pending')
+  const completedInstances = instances.filter((i) => i.status === 'completed')
 
   // Achievement progress (show top 3 not yet unlocked)
   const inProgressAchievements = progress
@@ -97,6 +218,8 @@ export function Tasks() {
         </div>
       )}
 
+      <CreateTaskModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -105,48 +228,10 @@ export function Tasks() {
             {pendingInstances.length} offen, {completedInstances.length} erledigt
           </p>
         </div>
-        <Button variant="primary">
+        <Button variant="primary" onClick={() => setShowCreateModal(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Neue Aufgabe
         </Button>
-      </div>
-
-      {/* Room Filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-        <button
-          onClick={() => setSelectedRoom(null)}
-          className={clsx(
-            'flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap transition-all duration-200',
-            'border min-w-fit touch-target',
-            selectedRoom === null
-              ? 'bg-accent/15 border-accent/50 text-accent'
-              : 'bg-surface-elevated border-border/30 text-text-secondary hover:bg-surface-hover hover:border-border/50'
-          )}
-        >
-          <Home className="w-4 h-4 flex-shrink-0" />
-          <span className="text-sm font-medium">Alle</span>
-        </button>
-        {rooms
-          .filter((r) => r.ha_area_id !== 'wecker')
-          .map((room) => {
-            const Icon = roomIcons[room.ha_area_id || ''] || DoorOpen
-            return (
-              <button
-                key={room.id}
-                onClick={() => setSelectedRoom(room.id)}
-                className={clsx(
-                  'flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap transition-all duration-200',
-                  'border min-w-fit touch-target',
-                  selectedRoom === room.id
-                    ? 'bg-accent/15 border-accent/50 text-accent'
-                    : 'bg-surface-elevated border-border/30 text-text-secondary hover:bg-surface-hover hover:border-border/50'
-                )}
-              >
-                <Icon className="w-4 h-4 flex-shrink-0" />
-                <span className="text-sm font-medium">{room.name}</span>
-              </button>
-            )
-          })}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
