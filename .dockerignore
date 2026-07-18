@@ -1,0 +1,7 @@
+node_modules
+bff/node_modules
+bff/dist
+dist
+.git
+.env
+*.md

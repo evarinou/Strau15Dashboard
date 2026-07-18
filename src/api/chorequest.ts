@@ -13,17 +13,18 @@ import type {
   CompleteRequest,
   AssignRequest,
 } from '../types/chorequest'
-import { config } from '../config/runtime'
 
 async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const response = await fetch(`${config.CHOREQUEST_URL}${endpoint}`, {
+  // Endpunkte sind als '/api/...' notiert; der BFF-Proxy mappt
+  // /api/chorequest/* auf ${CHOREQUEST_URL}/api/* und hängt den
+  // Bearer-Token serverseitig an — der Browser sieht keine Tokens mehr.
+  const response = await fetch(`/api/chorequest${endpoint.replace(/^\/api/, '')}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.CHOREQUEST_TOKEN}`,
       ...options.headers,
     },
   })

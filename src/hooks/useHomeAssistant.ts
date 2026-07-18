@@ -1,12 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
-import type {
-  HassEntity,
-  HassAuthMessage,
-  HassResultMessage,
-  HassEventMessage,
-  HassServiceCall,
-} from '../types/homeassistant'
-import { config } from '../config/runtime'
+import type { HassEntity, HassServiceCall } from '../types/homeassistant'
+import type { ServerMessage } from '../../shared/api-types'
 
 type ConnectionState = 'disconnected' | 'connecting' | 'authenticating' | 'connected'
 
@@ -15,6 +9,14 @@ interface UseHomeAssistantReturn {
   connectionState: ConnectionState
   callService: (call: HassServiceCall) => Promise<void>
   getEntity: (entityId: string) => HassEntity | undefined
+}
+
+// Der Browser spricht nicht mehr direkt mit Home Assistant, sondern mit dem
+// BFF-Relay unter /ws (same-origin, tokenlos). Der BFF hält die eigentliche
+// HA-Verbindung samt Token serverseitig.
+function relayUrl(): string {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${protocol}//${window.location.host}/ws`
 }
 
 export function useHomeAssistant(): UseHomeAssistantReturn {
@@ -27,142 +29,99 @@ export function useHomeAssistant(): UseHomeAssistantReturn {
   const reconnectTimeoutRef = useRef<number | null>(null)
   const reconnectDelayRef = useRef(1000)
 
-  const getNextMessageId = useCallback(() => {
-    return messageIdRef.current++
-  }, [])
-
-  const sendMessage = useCallback((message: Record<string, unknown>) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(message))
-    }
-  }, [])
-
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return
 
     setConnectionState('connecting')
-    const ws = new WebSocket(config.HA_WS_URL)
+    const ws = new WebSocket(relayUrl())
     wsRef.current = ws
 
     ws.onopen = () => {
-      console.log('[HA] WebSocket connected')
+      console.log('[BFF] WebSocket verbunden')
+      reconnectDelayRef.current = 1000
     }
 
     ws.onmessage = (event) => {
-      const message = JSON.parse(event.data)
+      const message = JSON.parse(event.data) as ServerMessage
 
       switch (message.type) {
-        case 'auth_required':
-          setConnectionState('authenticating')
-          const authMessage: HassAuthMessage = {
-            type: 'auth',
-            access_token: config.HA_TOKEN,
+        case 'init': {
+          const newEntities = new Map<string, HassEntity>()
+          for (const entity of message.states as HassEntity[]) {
+            newEntities.set(entity.entity_id, entity)
           }
-          ws.send(JSON.stringify(authMessage))
+          setEntities(newEntities)
+          setConnectionState(message.connected ? 'connected' : 'connecting')
+          console.log(`[BFF] ${newEntities.size} Entities geladen (HA ${message.connected ? 'verbunden' : 'getrennt'})`)
           break
+        }
 
-        case 'auth_ok':
-          console.log('[HA] Authenticated')
-          setConnectionState('connected')
-          reconnectDelayRef.current = 1000
-
-          // Subscribe to state changes
-          const subscribeId = getNextMessageId()
-          sendMessage({
-            id: subscribeId,
-            type: 'subscribe_events',
-            event_type: 'state_changed',
-          })
-
-          // Fetch all states
-          const statesId = getNextMessageId()
-          sendMessage({
-            id: statesId,
-            type: 'get_states',
-          })
-          break
-
-        case 'auth_invalid':
-          console.error('[HA] Authentication failed')
-          setConnectionState('disconnected')
-          ws.close()
-          break
-
-        case 'result':
-          const resultMsg = message as HassResultMessage
-          if (resultMsg.success && Array.isArray(resultMsg.result)) {
-            // Initial states response
-            const newEntities = new Map<string, HassEntity>()
-            for (const entity of resultMsg.result as HassEntity[]) {
-              newEntities.set(entity.entity_id, entity)
+        case 'state_changed': {
+          const { entity_id, new_state } = message
+          setEntities((prev) => {
+            const next = new Map(prev)
+            if (new_state) {
+              next.set(entity_id, new_state as HassEntity)
+            } else {
+              next.delete(entity_id)
             }
-            setEntities(newEntities)
-            console.log(`[HA] Loaded ${newEntities.size} entities`)
-          }
+            return next
+          })
+          break
+        }
 
-          // Resolve pending service calls
-          const pendingCall = pendingCallsRef.current.get(resultMsg.id)
+        case 'result': {
+          const pendingCall = pendingCallsRef.current.get(message.id)
           if (pendingCall) {
-            if (resultMsg.success) {
+            if (message.success) {
               pendingCall.resolve()
             } else {
-              pendingCall.reject(new Error(resultMsg.error?.message || 'Unknown error'))
+              pendingCall.reject(new Error(message.error?.message || 'Unbekannter Fehler'))
             }
-            pendingCallsRef.current.delete(resultMsg.id)
+            pendingCallsRef.current.delete(message.id)
           }
           break
+        }
 
-        case 'event':
-          const eventMsg = message as HassEventMessage
-          if (eventMsg.event.event_type === 'state_changed') {
-            const { entity_id, new_state } = eventMsg.event.data
-            setEntities((prev) => {
-              const next = new Map(prev)
-              if (new_state) {
-                next.set(entity_id, new_state)
-              } else {
-                next.delete(entity_id)
-              }
-              return next
-            })
-          }
+        case 'ha_status':
+          setConnectionState(message.connected ? 'connected' : 'connecting')
           break
       }
     }
 
     ws.onclose = () => {
-      console.log('[HA] WebSocket disconnected')
+      console.log('[BFF] WebSocket getrennt')
       setConnectionState('disconnected')
       wsRef.current = null
 
-      // Reconnect with exponential backoff
+      // Reconnect mit exponential backoff
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current)
       }
       reconnectTimeoutRef.current = window.setTimeout(() => {
-        console.log(`[HA] Reconnecting in ${reconnectDelayRef.current}ms...`)
+        console.log(`[BFF] Reconnect in ${reconnectDelayRef.current}ms...`)
         reconnectDelayRef.current = Math.min(reconnectDelayRef.current * 2, 30000)
         connect()
       }, reconnectDelayRef.current)
     }
 
     ws.onerror = (error) => {
-      console.error('[HA] WebSocket error:', error)
+      console.error('[BFF] WebSocket-Fehler:', error)
     }
-  }, [getNextMessageId, sendMessage])
+  }, [])
 
-  const callService = useCallback(
-    (call: HassServiceCall): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        if (wsRef.current?.readyState !== WebSocket.OPEN) {
-          reject(new Error('Not connected'))
-          return
-        }
+  const callService = useCallback((call: HassServiceCall): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (wsRef.current?.readyState !== WebSocket.OPEN) {
+        reject(new Error('Nicht verbunden'))
+        return
+      }
 
-        const id = getNextMessageId()
-        pendingCallsRef.current.set(id, { resolve, reject })
+      const id = messageIdRef.current++
+      pendingCallsRef.current.set(id, { resolve, reject })
 
-        sendMessage({
+      wsRef.current.send(
+        JSON.stringify({
           id,
           type: 'call_service',
           domain: call.domain,
@@ -170,18 +129,17 @@ export function useHomeAssistant(): UseHomeAssistantReturn {
           target: call.target,
           service_data: call.service_data,
         })
+      )
 
-        // Timeout after 10 seconds
-        setTimeout(() => {
-          if (pendingCallsRef.current.has(id)) {
-            pendingCallsRef.current.delete(id)
-            reject(new Error('Service call timeout'))
-          }
-        }, 10000)
-      })
-    },
-    [getNextMessageId, sendMessage]
-  )
+      // Timeout nach 10 Sekunden
+      setTimeout(() => {
+        if (pendingCallsRef.current.has(id)) {
+          pendingCallsRef.current.delete(id)
+          reject(new Error('Service call timeout'))
+        }
+      }, 10000)
+    })
+  }, [])
 
   const getEntity = useCallback(
     (entityId: string): HassEntity | undefined => {

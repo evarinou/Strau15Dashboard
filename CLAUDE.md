@@ -5,9 +5,10 @@ Modernes Home Dashboard für Eva-Maria & Lukas mit Home Assistant und ChoreQuest
 ## Quick Start
 
 ```bash
-# Development
+# Development (Frontend + BFF zusammen; Vite proxied /api und /ws auf :8080)
 npm install
-npm run dev
+cd bff && npm install && cd ..
+npm run dev:all
 
 # Production Build
 npm run build
@@ -16,25 +17,34 @@ npm run build
 docker compose up --build
 ```
 
+**Hinweis Dev-Maschine:** `strau15machine` löst lokal evtl. nicht auf — dann `HA_URL`/`CHOREQUEST_URL` mit der IP (192.168.178.109) als Env-Vars für den BFF setzen.
+
 ## Tech Stack
 
 - **Frontend:** React 19 + TypeScript + Vite 7
+- **BFF:** Node 22 + Fastify 5 (`bff/`) — hält alle Dienst-Tokens serverseitig, serviert SPA + `/api/*` + `/ws`
 - **Styling:** Tailwind CSS v4 (Dark Theme Default)
 - **State:** TanStack Query + React Context
 - **Routing:** React Router v7
 - **Icons:** Lucide React
-- **Container:** Docker + nginx
+- **Container:** Docker (ein Image: Fastify serviert alles, kein nginx mehr)
 
 ## Externe Services
 
+Alle Tokens leben ausschließlich im BFF (Env-Vars des Containers). Der Browser
+spricht nur same-origin mit dem BFF: `/ws` (HA-Live-State-Relay), `/api/chorequest/*`
+(Proxy) und die HA-Bild-Proxies (`/api/media_player_proxy/…` etc.).
+
 ### Home Assistant
-- **URL:** `http://strau15machine:8123`
-- **WebSocket:** `ws://strau15machine:8123/api/websocket`
-- **Auth:** Long-lived Access Token via `VITE_HA_TOKEN` env var
+- **URL:** `http://strau15machine:8123` (`HA_URL`)
+- **Auth:** Long-lived Access Token via `HA_TOKEN` (nur BFF)
+- Der BFF hält EINE HA-WebSocket-Verbindung (Auth, subscribe_events, State-Cache,
+  Reconnect) und fanned Events an alle Browser-Clients aus. `call_service` läuft
+  über eine Domain-Allowlist (`bff/src/ha/relay.ts`).
 
 ### ChoreQuest (Haushaltsmanager)
-- **URL:** `http://strau15machine:8007`
-- **Auth:** Bearer Token via `VITE_CHOREQUEST_TOKEN` (separater Token, NICHT der HA-Token!)
+- **URL:** `http://strau15machine:8007` (`CHOREQUEST_URL`)
+- **Auth:** Bearer Token via `CHOREQUEST_TOKEN` (separater Token, NICHT der HA-Token!)
 - **OpenAPI:** `/openapi.json`
 
 ## Benutzer
@@ -128,6 +138,18 @@ scene.fernsehabend
 ## Projektstruktur
 
 ```
+bff/                                # Fastify-BFF (eigenes npm-Paket)
+└── src/
+    ├── index.ts                    # Bootstrap, SPA-Serving, Shutdown
+    ├── config.ts                   # Env-Schema (mit VITE_*-Aliassen)
+    ├── ha/connection.ts            # HA-Upstream-WS + State-Cache
+    ├── ha/relay.ts                 # /ws Browser-Relay (Allowlist, Fanout)
+    ├── routes/health.ts            # /health + /api/status
+    ├── routes/chorequest.ts        # /api/chorequest/* Proxy
+    ├── routes/ha-proxy.ts          # HA-Bild-Proxy (Album-Art, Avatare, Kamera)
+    └── lib/upstream.ts             # fetch-Helper
+shared/
+└── api-types.ts                    # WS-Protokolltypen (Frontend + BFF)
 src/
 ├── api/
 │   └── chorequest.ts           # ChoreQuest API Client (typisiert)
@@ -176,12 +198,21 @@ src/
 
 ## Environment Variables
 
+Alle Variablen sind **BFF-Env-Vars** (serverseitig, kein `VITE_`-Präfix mehr im
+Frontend-Build). Die alten `VITE_*`-Namen werden vom BFF übergangsweise als
+Aliase akzeptiert (siehe `bff/src/config.ts`).
+
 ```env
-VITE_HA_URL=http://strau15machine:8123
-VITE_HA_WS_URL=ws://strau15machine:8123/api/websocket
-VITE_HA_TOKEN=<home-assistant-long-lived-access-token>
-VITE_CHOREQUEST_URL=http://strau15machine:8007
-VITE_CHOREQUEST_TOKEN=<chorequest-api-token>
+# Pflicht
+HA_URL=http://strau15machine:8123
+HA_TOKEN=<home-assistant-long-lived-access-token>
+CHOREQUEST_URL=http://strau15machine:8007
+CHOREQUEST_TOKEN=<chorequest-api-token>
+
+# Optional (Phase 2 — fehlende Werte deaktivieren nur das jeweilige Feature)
+ANTHROPIC_API_KEY=  IMMICH_URL=  IMMICH_API_KEY=
+VIKUNJA_URL=  VIKUNJA_TOKEN=  VIKUNJA_PROJECT=Strau15
+PAPERLESS_URL=  PAPERLESS_TOKEN=  BRIEFING_TTL_HOURS=6
 ```
 
 **Wichtig:** Home Assistant und ChoreQuest verwenden separate Tokens!
@@ -189,14 +220,14 @@ VITE_CHOREQUEST_TOKEN=<chorequest-api-token>
 ## Docker Deployment
 
 ```bash
-# Build und Start
+# Build und Start (Tokens aus .env)
 docker compose up --build -d
-
-# Mit explizitem Token
-HA_TOKEN=your-token docker compose up --build -d
 ```
 
-Dashboard erreichbar unter `http://localhost:3000`
+Ein Container: Fastify (Port 8080 intern) serviert SPA, `/api/*` und `/ws`.
+Dashboard erreichbar unter `http://localhost:3001` (bzw. `DASHBOARD_PORT`).
+Produktiv läuft das Image `ghcr.io/evarinou/strau15dashboard:latest` auf
+strau15machine (Port 3050), Deploy via GitHub Actions + Watchtower bei Push auf main.
 
 ## Design System
 
@@ -221,24 +252,16 @@ Dashboard erreichbar unter `http://localhost:3000`
 
 ## WebSocket Integration
 
-### Verbindung
-- Automatische Reconnection mit exponential backoff (1s → 30s max)
-- Auth via Long-lived Access Token
-- State-Caching im React Context
+Zwei Ebenen, Protokolltypen in `shared/api-types.ts`:
 
-### Events
-```typescript
-// Subscribe to state changes
-{ type: 'subscribe_events', event_type: 'state_changed' }
-
-// Call service
-{
-  type: 'call_service',
-  domain: 'light',
-  service: 'toggle',
-  target: { entity_id: 'light.doppellampe' }
-}
-```
+1. **BFF ↔ Home Assistant** (`bff/src/ha/connection.ts`): Auth-Handshake mit
+   `HA_TOKEN`, `subscribe_events` VOR `get_states` (sonst Event-Lücke),
+   State-Cache als Map, Reconnect mit exponential backoff (1s → 30s max).
+2. **Browser ↔ BFF** (`/ws`, tokenlos, `bff/src/ha/relay.ts` +
+   `src/hooks/useHomeAssistant.ts`): Bei Connect kommt `{type:'init', connected,
+   states[]}`; danach `state_changed`-Fanout. `call_service` vom Client wird mit
+   Domain-Allowlist geprüft, upstream neu nummeriert und das `result` nur an den
+   Absender zurückgegeben.
 
 ## API Integration
 
