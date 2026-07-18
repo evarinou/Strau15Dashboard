@@ -103,7 +103,7 @@ export const ColorTempSlider = forwardRef<HTMLInputElement, ColorTempSliderProps
             // But slider value is inverted: high mireds = warm, low = cool
             // So we reverse: right side warm (#ffb46b), left side cool (#c9e2ff)
             background: 'linear-gradient(to left, #ffb46b, #ffd6a5, #ffffff, #e0eeff, #c9e2ff)',
-            boxShadow: 'inset 0 0 0 1px oklch(0.371 0.017 285.82 / 0.3)',
+            boxShadow: 'inset 0 0 0 1px rgb(211 209 199 / 0.3)',
           }}
           {...props}
         />

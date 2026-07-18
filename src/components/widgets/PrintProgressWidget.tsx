@@ -107,9 +107,9 @@ export function PrintProgressWidget({
           style={{
             width: `${displayProgress}%`,
             boxShadow: isPrinting
-              ? '0 0 15px oklch(0.623 0.214 259.13 / 0.5)'
+              ? '0 0 15px rgb(216 90 48 / 0.5)'
               : isFinished
-                ? '0 0 15px oklch(0.627 0.194 149.21 / 0.5)'
+                ? '0 0 15px rgb(76 122 92 / 0.5)'
                 : undefined,
           }}
         />

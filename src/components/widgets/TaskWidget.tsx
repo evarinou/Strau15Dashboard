@@ -110,7 +110,7 @@ export function TaskWidget({
           )}
           style={{
             boxShadow: isCompleted
-              ? '0 0 12px oklch(0.627 0.194 149.21 / 0.5)'
+              ? '0 0 12px rgb(76 122 92 / 0.5)'
               : 'none',
           }}
         >

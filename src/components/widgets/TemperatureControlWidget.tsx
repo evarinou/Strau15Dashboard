@@ -27,14 +27,14 @@ const TYPE_CONFIG = {
   },
   bed: {
     icon: Square,
-    color: 'oklch(0.85 0.18 195)', // Cyan
+    color: 'rgb(216 90 48)', // Cyan
     minDefault: 0,
     maxDefault: 120,
     stepDefault: 5,
   },
   chamber: {
     icon: Square,
-    color: 'oklch(0.627 0.194 149.21)', // Green
+    color: 'rgb(76 122 92)', // Green
     minDefault: 0,
     maxDefault: 60,
     stepDefault: 1,

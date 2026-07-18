@@ -150,7 +150,7 @@ export function ColorPicker({ value, onChange, className }: ColorPickerProps) {
             hsl(360, 100%, 50%)
           )
         `,
-        boxShadow: 'inset 0 0 0 1px oklch(0.371 0.017 285.82 / 0.5)',
+        boxShadow: 'inset 0 0 0 1px rgb(211 209 199 / 0.5)',
       }}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}

@@ -132,7 +132,7 @@ export function PrintPreviewWidget({
                       className="absolute bottom-2 left-[10%] w-[80%] bg-accent/30 rounded-sm transition-all duration-1000"
                       style={{
                         height: `${(displayProgress / 100) * 60}%`,
-                        boxShadow: '0 0 20px oklch(0.623 0.214 259.13 / 0.3)',
+                        boxShadow: '0 0 20px rgb(216 90 48 / 0.3)',
                       }}
                     >
                       <div className="absolute inset-0 animate-shimmer rounded-sm" />

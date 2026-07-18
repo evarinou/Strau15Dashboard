@@ -6,9 +6,15 @@ import fastifyWebsocket from '@fastify/websocket'
 import { config, logFeatureStatus } from './config.js'
 import { HaConnection } from './ha/connection.js'
 import { registerHaRelay } from './ha/relay.js'
+import { BriefingService } from './briefing/briefing.js'
 import { registerHealthRoutes } from './routes/health.js'
 import { registerChoreQuestProxy } from './routes/chorequest.js'
 import { registerHaImageProxy } from './routes/ha-proxy.js'
+import { registerBriefingRoutes } from './routes/briefing.js'
+import { registerCalendarRoutes } from './routes/calendar.js'
+import { registerPhotoRoutes } from './routes/photos.js'
+import { registerTaskRoutes } from './routes/tasks.js'
+import { registerDocumentRoutes } from './routes/documents.js'
 
 const app = Fastify({
   logger: { level: process.env.LOG_LEVEL ?? 'info' },
@@ -21,6 +27,9 @@ logFeatureStatus()
 const ha = new HaConnection(config.haWsUrl, config.haToken)
 ha.start()
 
+const briefing = new BriefingService(ha)
+await briefing.start()
+
 await app.register(fastifyWebsocket)
 await app.register(fastifyCompress)
 
@@ -28,6 +37,11 @@ registerHealthRoutes(app, ha)
 registerHaRelay(app, ha)
 registerChoreQuestProxy(app)
 registerHaImageProxy(app)
+registerBriefingRoutes(app, briefing)
+registerCalendarRoutes(app)
+registerPhotoRoutes(app)
+registerTaskRoutes(app)
+registerDocumentRoutes(app)
 
 // SPA-Auslieferung: Vite hasht Asset-Dateinamen → /assets/* darf aggressiv
 // gecacht werden; index.html nie (sonst zeigt der Browser alte Bundles).
@@ -58,6 +72,7 @@ if (existsSync(config.publicDir)) {
 
 const shutdown = async () => {
   ha.stop()
+  briefing.stop()
   await app.close()
   process.exit(0)
 }

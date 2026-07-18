@@ -196,7 +196,7 @@ function AMSStats({
             data={temperatureHistory}
             width={60}
             height={24}
-            color="oklch(0.85 0.18 195)"
+            color="rgb(216 90 48)"
             className="mt-1"
           />
         )}
@@ -214,7 +214,7 @@ function AMSStats({
             data={humidityHistory}
             width={60}
             height={24}
-            color="oklch(0.623 0.214 259.13)"
+            color="rgb(216 90 48)"
             className="mt-1"
           />
         )}

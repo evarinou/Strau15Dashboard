@@ -84,7 +84,7 @@ export function LeaderboardWidget({
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center"
-            style={{ boxShadow: '0 0 12px oklch(0.769 0.188 70.08 / 0.3)' }}
+            style={{ boxShadow: '0 0 12px rgb(168 117 43 / 0.3)' }}
           >
             <Trophy className="w-5 h-5 text-warning icon-glow-warning" />
           </div>
@@ -161,7 +161,7 @@ function LeaderboardRow({
       )}
       style={{
         boxShadow: isLeader
-          ? '0 0 20px oklch(0.769 0.188 70.08 / 0.15)'
+          ? '0 0 20px rgb(168 117 43 / 0.15)'
           : undefined,
       }}
     >
@@ -175,7 +175,7 @@ function LeaderboardRow({
         )}
         style={{
           boxShadow: isLeader
-            ? '0 0 12px oklch(0.769 0.188 70.08 / 0.5)'
+            ? '0 0 12px rgb(168 117 43 / 0.5)'
             : undefined,
         }}
       >

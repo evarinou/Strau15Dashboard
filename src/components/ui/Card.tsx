@@ -8,6 +8,12 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   entranceDelay?: number
   glowOnActive?: boolean
   glowColor?: 'accent' | 'warning' | 'success' | 'cyan'
+  /**
+   * Editorial-Varianten der warmen Design-Sprache:
+   * - accent: Terrakotta als linke Kante mit eckigen Ecken, rechts abgerundet
+   * - photo:  zartes Altrosa für den Foto-Block
+   */
+  tone?: 'default' | 'accent' | 'photo'
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
@@ -20,6 +26,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       entranceDelay = 0,
       glowOnActive = false,
       glowColor = 'accent',
+      tone = 'default',
       children,
       ...props
     },
@@ -40,12 +47,13 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={clsx(
-          // Base glass-morphism style
-          'relative rounded-xl glass border border-border/30',
-          // Gradient border overlay
-          'before:absolute before:inset-0 before:rounded-xl before:p-[1px]',
-          'before:bg-gradient-to-br before:from-border/40 before:via-transparent before:to-border/20',
-          'before:-z-10 before:pointer-events-none',
+          'relative border',
+          tone === 'default' && 'rounded-xl glass border-border/30',
+          // Terrakotta-Kante: links eckig, rechts 14px Radius
+          tone === 'accent' &&
+            'rounded-r-[14px] rounded-l-none border-border bg-surface-elevated border-l-4 border-l-accent shadow-float',
+          tone === 'photo' &&
+            'rounded-r-[14px] rounded-l-none border-photo-text/20 bg-photo-surface border-l-4 border-l-photo-text shadow-float',
           {
             // Interactive variant
             'transition-all duration-200 cursor-pointer': variant === 'interactive',

@@ -117,7 +117,7 @@ export function AlarmWidget({
               isActive ? 'bg-accent/20' : 'bg-surface-hover'
             )}
             style={{
-              boxShadow: isActive ? '0 0 12px oklch(0.623 0.214 259.13 / 0.3)' : undefined,
+              boxShadow: isActive ? '0 0 12px rgb(216 90 48 / 0.3)' : undefined,
             }}
           >
             {isActive ? (
@@ -155,7 +155,7 @@ export function AlarmWidget({
           isActive && 'border-accent/30'
         )}
         style={{
-          boxShadow: isActive ? '0 0 20px oklch(0.623 0.214 259.13 / 0.1)' : undefined,
+          boxShadow: isActive ? '0 0 20px rgb(216 90 48 / 0.1)' : undefined,
         }}
       >
         {/* Background glow when active */}
@@ -163,7 +163,7 @@ export function AlarmWidget({
           <div
             className="absolute inset-0 opacity-30 pointer-events-none"
             style={{
-              background: 'radial-gradient(circle at 30% 30%, oklch(0.623 0.214 259.13 / 0.15), transparent 70%)',
+              background: 'radial-gradient(circle at 30% 30%, rgb(216 90 48 / 0.15), transparent 70%)',
             }}
           />
         )}
@@ -189,7 +189,7 @@ export function AlarmWidget({
                 isActive ? 'bg-accent/20' : 'bg-surface-hover/50'
               )}
               style={{
-                boxShadow: isActive ? '0 0 15px oklch(0.623 0.214 259.13 / 0.3)' : undefined,
+                boxShadow: isActive ? '0 0 15px rgb(216 90 48 / 0.3)' : undefined,
               }}
             >
               {isActive ? (
@@ -316,7 +316,7 @@ export function AlarmWidget({
               isActive ? 'bg-accent/20' : 'bg-surface-hover'
             )}
             style={{
-              boxShadow: isActive ? '0 0 30px oklch(0.623 0.214 259.13 / 0.3)' : undefined,
+              boxShadow: isActive ? '0 0 30px rgb(216 90 48 / 0.3)' : undefined,
             }}
           >
             {isActive ? (
@@ -358,7 +358,7 @@ export function AlarmWidget({
                       : 'bg-surface-hover text-text-secondary hover:bg-surface-hover/80 border border-transparent'
                   )}
                   style={{
-                    boxShadow: isSelected ? '0 0 10px oklch(0.623 0.214 259.13 / 0.2)' : undefined,
+                    boxShadow: isSelected ? '0 0 10px rgb(216 90 48 / 0.2)' : undefined,
                   }}
                 >
                   <Icon className="w-4 h-4" />

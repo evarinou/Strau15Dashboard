@@ -36,7 +36,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(
     const thumbGlow = useMemo(() => {
       if (!glowIntensity || percentage === 0) return 'none'
       const intensity = 8 + (percentage / 100) * 12 // 8px to 20px
-      return `0 0 ${intensity}px oklch(0.623 0.214 259.13 / ${glowOpacity})`
+      return `0 0 ${intensity}px rgb(216 90 48 / ${glowOpacity})`
     }, [glowIntensity, percentage, glowOpacity])
 
     return (
@@ -74,7 +74,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(
             // Add glow to the filled portion
             boxShadow:
               percentage > 0 && glowIntensity
-                ? `inset 0 0 8px oklch(0.623 0.214 259.13 / ${glowOpacity * 0.5})`
+                ? `inset 0 0 8px rgb(216 90 48 / ${glowOpacity * 0.5})`
                 : 'none',
           }}
           {...props}
@@ -85,7 +85,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(
             className="absolute top-1/2 left-0 h-2 rounded-full pointer-events-none -translate-y-1/2 transition-all duration-200"
             style={{
               width: `${percentage}%`,
-              boxShadow: `0 0 12px oklch(0.623 0.214 259.13 / ${glowOpacity})`,
+              boxShadow: `0 0 12px rgb(216 90 48 / ${glowOpacity})`,
             }}
           />
         )}

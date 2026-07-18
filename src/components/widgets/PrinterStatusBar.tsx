@@ -66,36 +66,36 @@ const STATUS_CONFIG: Record<PrinterStatus, {
 }> = {
   idle: {
     label: 'Bereit',
-    color: 'oklch(0.627 0.194 149.21)',
-    bgColor: 'oklch(0.627 0.194 149.21 / 0.2)',
+    color: 'rgb(76 122 92)',
+    bgColor: 'rgb(76 122 92 / 0.2)',
     icon: CheckCircle2,
     pulse: false,
   },
   printing: {
     label: 'Druckt',
-    color: 'oklch(0.623 0.214 259.13)',
-    bgColor: 'oklch(0.623 0.214 259.13 / 0.2)',
+    color: 'rgb(216 90 48)',
+    bgColor: 'rgb(216 90 48 / 0.2)',
     icon: Play,
     pulse: true,
   },
   paused: {
     label: 'Pausiert',
-    color: 'oklch(0.769 0.188 70.08)',
-    bgColor: 'oklch(0.769 0.188 70.08 / 0.2)',
+    color: 'rgb(168 117 43)',
+    bgColor: 'rgb(168 117 43 / 0.2)',
     icon: Pause,
     pulse: false,
   },
   finished: {
     label: 'Fertig',
-    color: 'oklch(0.627 0.194 149.21)',
-    bgColor: 'oklch(0.627 0.194 149.21 / 0.2)',
+    color: 'rgb(76 122 92)',
+    bgColor: 'rgb(76 122 92 / 0.2)',
     icon: CheckCircle2,
     pulse: false,
   },
   error: {
     label: 'Fehler',
-    color: 'oklch(0.577 0.245 27.33)',
-    bgColor: 'oklch(0.577 0.245 27.33 / 0.2)',
+    color: 'rgb(178 59 46)',
+    bgColor: 'rgb(178 59 46 / 0.2)',
     icon: AlertTriangle,
     pulse: true,
   },
@@ -130,14 +130,14 @@ export function PrinterStatusBar({
     if (nozzleTemp > 220) return 'oklch(0.65 0.25 35)' // Red/hot
     if (nozzleTemp > 180) return 'oklch(0.8 0.2 70)' // Orange
     if (nozzleTemp > 50) return 'oklch(0.85 0.18 100)' // Yellow
-    return 'oklch(0.85 0.18 195)' // Cyan/cool
+    return 'rgb(216 90 48)' // Cyan/cool
   }
 
   const getBedTempColor = () => {
     if (bedTemp === null || bedTemp === undefined) return undefined
     if (bedTemp > 80) return 'oklch(0.8 0.2 70)' // Orange
     if (bedTemp > 50) return 'oklch(0.85 0.18 100)' // Yellow
-    return 'oklch(0.85 0.18 195)' // Cyan
+    return 'rgb(216 90 48)' // Cyan
   }
 
   return (
@@ -165,8 +165,8 @@ export function PrinterStatusBar({
         }
         label="Drucker"
         value={isOnline ? 'Online' : 'Offline'}
-        color={isOnline ? 'oklch(0.627 0.194 149.21)' : 'oklch(0.577 0.245 27.33)'}
-        bgColor={isOnline ? 'oklch(0.627 0.194 149.21 / 0.2)' : 'oklch(0.577 0.245 27.33 / 0.2)'}
+        color={isOnline ? 'rgb(76 122 92)' : 'rgb(178 59 46)'}
+        bgColor={isOnline ? 'rgb(76 122 92 / 0.2)' : 'rgb(178 59 46 / 0.2)'}
       />
 
       <div className="flex-1" />
@@ -177,8 +177,8 @@ export function PrinterStatusBar({
           icon={<Wind className="w-4 h-4 text-neon-cyan" />}
           label="Luftqualität"
           value={`${airQuality} µg/m³`}
-          color="oklch(0.85 0.18 195)"
-          bgColor="oklch(0.85 0.18 195 / 0.15)"
+          color="rgb(216 90 48)"
+          bgColor="rgb(216 90 48 / 0.15)"
         />
       )}
 
@@ -210,8 +210,8 @@ export function PrinterStatusBar({
           icon={<Droplets className="w-4 h-4 text-accent" />}
           label="Feuchtigkeit"
           value={`${Math.round(humidity)}%`}
-          color="oklch(0.623 0.214 259.13)"
-          bgColor="oklch(0.623 0.214 259.13 / 0.15)"
+          color="rgb(216 90 48)"
+          bgColor="rgb(216 90 48 / 0.15)"
         />
       )}
     </div>

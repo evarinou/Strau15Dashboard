@@ -231,19 +231,31 @@ strau15machine (Port 3050), Deploy via GitHub Actions + Watchtower bei Push auf 
 
 ## Design System
 
-### Farben (Tailwind Custom Theme)
+Design-Sprache „Warm & wohnlich" — editorial, passend zum Haus von 1842.
+**Typo-Regel (Kern des Looks):** Serif (Fraunces Variable) NUR für Begrüßung und
+KI-Briefing; alles Funktionale (Tasks, Zahlen, Labels) in Source Sans 3.
+Beide Fonts self-hosted via @fontsource (Import in `src/index.css`).
+
+### Farben (Tailwind @theme in src/index.css)
 ```css
---color-surface: oklch(0.145 0.014 285.82);        /* Hintergrund */
---color-surface-elevated: oklch(0.205 0.015 285.82); /* Cards */
---color-surface-hover: oklch(0.269 0.015 285.82);  /* Hover States */
---color-border: oklch(0.371 0.017 285.82);         /* Borders */
---color-text-primary: oklch(0.985 0 0);            /* Haupttext */
---color-text-secondary: oklch(0.708 0.014 285.82); /* Sekundärtext */
---color-accent: oklch(0.623 0.214 259.13);         /* Akzentfarbe (Blau) */
---color-success: oklch(0.627 0.194 149.21);        /* Erfolg (Grün) */
---color-warning: oklch(0.769 0.188 70.08);         /* Warnung (Gelb) */
---color-danger: oklch(0.577 0.245 27.33);          /* Fehler (Rot) */
+--color-surface: #F1EFE8;           /* Grundfläche Sandbeige */
+--color-surface-elevated: #FAF7F0;  /* Cards cremeweiß */
+--color-border: #D3D1C7;
+--color-text-primary: #2C2C2A;
+--color-text-secondary: #5F5E5A;    /* warmes Grau */
+--color-accent: #D85A30;            /* Terrakotta */
+--color-accent-ink: #4A1B0C;        /* Terrakotta-Text stark */
+--color-accent-text: #712B13;
+--color-accent-soft: #993C1D;
+--color-photo-surface: #FBEAF0;     /* Foto-Block Altrosa */
+--color-photo-ink: #4B1528;
+--color-photo-text: #993556;
+--color-success: #4C7A5C;  --color-warning: #A8752B;  --color-danger: #B23B2E;
 ```
+
+**Formsprache:** Cards Radius 12–16px. Terrakotta-Akzent als linke Kante
+(`Card tone="accent"`: border-left 4px, links eckig, rechts 14px Radius);
+Foto-Block als `Card tone="photo"` in Altrosa.
 
 ### Komponenten
 - **Touch Targets:** Min. 44px für touch-friendly Buttons
@@ -285,12 +297,19 @@ const { data: leaderboard } = useWeeklyLeaderboard()
 
 ## Features
 
-### Dashboard
-- Begrüßung mit aktuellem Datum
-- Schnellzugriff: Alle Lichter, Szenen, Gute Nacht
-- Heutige Aufgaben mit One-Click Complete
-- Wochenrangliste (Eva-Maria vs Lukas)
-- Müllabholung (calendar.landkreis_kronach) + Wecker-Widget
+### Startseite
+- KI-Briefing „Was war / was kommt" (BriefingCard, Serif) — generiert im BFF
+  via Anthropic-API (`claude-opus-4-8`), Cache in `/data/briefing.json`,
+  feste Generierung 06:00/16:00 Europe/Berlin + stale-while-revalidate,
+  Nicht-KI-Fallback wenn Anthropic nicht erreichbar
+- Immich-Fotos „heute vor X Jahren" (PhotosCard, Altrosa; Thumbnails via BFF-Proxy)
+- Kalender-Block inkl. Müllabholung (CalendarCard, via HA-REST im BFF)
+- Vikunja-Tasks aus Projekt „Strau15" (VikunjaCard)
+- ChoreQuest: heutige Aufgaben mit One-Click Complete + Wochenrangliste
+- Paperless: letzte Dokumente, read-only (DocumentsCard)
+- Haus-Zeile: Schnellzugriff (Scripts/Szene), Lichter-Zähler, Wecker
+- Fehlt eine Server-Env-Var, liefert der BFF 503 {disabled:true} und die
+  jeweilige Karte blendet sich aus (Hooks in `src/hooks/useBff.ts`)
 
 ### Lichter
 - Grid-Ansicht aller Lichter

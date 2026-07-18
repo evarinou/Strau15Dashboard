@@ -87,7 +87,7 @@ export function LightWidget({
             <div
               className="absolute inset-0 rounded-full animate-breathe-warm"
               style={{
-                background: `radial-gradient(circle, oklch(0.769 0.188 70.08 / ${glowIntensity}) 0%, transparent 70%)`,
+                background: `radial-gradient(circle, rgb(168 117 43 / ${glowIntensity}) 0%, transparent 70%)`,
                 transform: 'scale(1.5)',
               }}
             />
@@ -102,7 +102,7 @@ export function LightWidget({
             )}
             style={{
               boxShadow: isOn
-                ? `0 0 ${12 + brightnessPercent * 0.1}px oklch(0.769 0.188 70.08 / ${glowIntensity})`
+                ? `0 0 ${12 + brightnessPercent * 0.1}px rgb(168 117 43 / ${glowIntensity})`
                 : 'none',
             }}
           >

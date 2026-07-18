@@ -20,7 +20,7 @@ const WEATHER_CONFIG: Record<
     icon: Sun,
     color: 'text-yellow-400',
     glowColor: 'icon-glow-warning',
-    bgGlow: 'oklch(0.769 0.188 70.08 / 0.15)',
+    bgGlow: 'rgb(168 117 43 / 0.15)',
   },
   'clear-night': {
     icon: Moon,
@@ -50,7 +50,7 @@ const WEATHER_CONFIG: Record<
     icon: CloudRain,
     color: 'text-blue-400',
     glowColor: 'icon-glow-accent',
-    bgGlow: 'oklch(0.623 0.214 259.13 / 0.15)',
+    bgGlow: 'rgb(216 90 48 / 0.15)',
   },
   snowy: {
     icon: CloudSnow,
@@ -74,13 +74,13 @@ const WEATHER_CONFIG: Record<
     icon: CloudLightning,
     color: 'text-yellow-300',
     glowColor: 'icon-glow-warning',
-    bgGlow: 'oklch(0.769 0.188 70.08 / 0.2)',
+    bgGlow: 'rgb(168 117 43 / 0.2)',
   },
   'lightning-rainy': {
     icon: CloudLightning,
     color: 'text-yellow-400',
     glowColor: 'icon-glow-warning',
-    bgGlow: 'oklch(0.769 0.188 70.08 / 0.2)',
+    bgGlow: 'rgb(168 117 43 / 0.2)',
   },
   fog: {
     icon: CloudFog,
@@ -110,7 +110,7 @@ const WEATHER_CONFIG: Record<
     icon: Cloud,
     color: 'text-gray-500',
     glowColor: '',
-    bgGlow: 'oklch(0.4 0.02 285 / 0.1)',
+    bgGlow: 'rgb(95 94 90 / 0.1)',
   },
 }
 
@@ -192,7 +192,7 @@ function SnowFlakes() {
             height: `${3 + p.size * 4}px`,
             animationDelay: `${p.delay}s`,
             animationDuration: `${2 + p.duration}s`,
-            boxShadow: '0 0 4px oklch(0.95 0.02 250 / 0.5)',
+            boxShadow: '0 0 4px rgb(255 255 255 / 0.5)',
           }}
         />
       ))}

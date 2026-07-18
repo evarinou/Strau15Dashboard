@@ -123,10 +123,10 @@ export function PrintDetailsWidget({
 
   const getStatusColor = () => {
     switch (details.statusType) {
-      case 'printing': return 'oklch(0.623 0.214 259.13)'
-      case 'finished': return 'oklch(0.627 0.194 149.21)'
-      case 'error': return 'oklch(0.577 0.245 27.33)'
-      case 'paused': return 'oklch(0.769 0.188 70.08)'
+      case 'printing': return 'rgb(216 90 48)'
+      case 'finished': return 'rgb(76 122 92)'
+      case 'error': return 'rgb(178 59 46)'
+      case 'paused': return 'rgb(168 117 43)'
       default: return undefined
     }
   }
@@ -150,7 +150,7 @@ export function PrintDetailsWidget({
           icon={<Percent className="w-5 h-5" />}
           label="Fortschritt"
           value={details.progress !== null ? `${Math.round(details.progress)}%` : '--'}
-          valueColor={details.statusType === 'printing' ? 'oklch(0.623 0.214 259.13)' : undefined}
+          valueColor={details.statusType === 'printing' ? 'rgb(216 90 48)' : undefined}
         />
 
         {/* Layer */}
@@ -179,8 +179,8 @@ export function PrintDetailsWidget({
             label="Benachrichtigungen"
             value={details.hmsNotifications}
             valueColor={details.hmsNotifications.toLowerCase().includes('ok')
-              ? 'oklch(0.627 0.194 149.21)'
-              : 'oklch(0.769 0.188 70.08)'
+              ? 'rgb(76 122 92)'
+              : 'rgb(168 117 43)'
             }
           />
         )}
@@ -205,7 +205,7 @@ export function PrintDetailsWidget({
           icon={<Timer className="w-5 h-5" />}
           label="Verbleibend"
           value={formatDuration(details.remainingTime)}
-          valueColor={details.statusType === 'printing' ? 'oklch(0.85 0.18 195)' : undefined}
+          valueColor={details.statusType === 'printing' ? 'rgb(216 90 48)' : undefined}
         />
 
         {/* Active tray */}

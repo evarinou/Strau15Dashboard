@@ -26,10 +26,10 @@ const FAN_ICONS = {
 }
 
 const FAN_COLORS = {
-  aux: 'oklch(0.769 0.188 70.08)', // Yellow/warning
-  chamber: 'oklch(0.623 0.214 259.13)', // Accent blue
-  cooling: 'oklch(0.85 0.18 195)', // Cyan
-  generic: 'oklch(0.627 0.194 149.21)', // Green
+  aux: 'rgb(168 117 43)', // Yellow/warning
+  chamber: 'rgb(216 90 48)', // Accent blue
+  cooling: 'rgb(216 90 48)', // Cyan
+  generic: 'rgb(76 122 92)', // Green
 }
 
 export function FanControlWidget({

@@ -151,7 +151,7 @@ export function Rooms() {
                                 : 'bg-surface-hover text-text-secondary hover:bg-surface-hover/80'
                             )}
                             style={{
-                              boxShadow: isOn ? '0 0 8px oklch(0.769 0.188 70.08 / 0.3)' : 'none',
+                              boxShadow: isOn ? '0 0 8px rgb(168 117 43 / 0.3)' : 'none',
                             }}
                           >
                             <Lightbulb className="w-3 h-3" />
@@ -181,7 +181,7 @@ export function Rooms() {
                                 : 'bg-surface-hover text-text-secondary hover:bg-surface-hover/80'
                             )}
                             style={{
-                              boxShadow: isOn ? '0 0 8px oklch(0.623 0.214 259.13 / 0.3)' : 'none',
+                              boxShadow: isOn ? '0 0 8px rgb(216 90 48 / 0.3)' : 'none',
                             }}
                           >
                             <Power className="w-3 h-3" />

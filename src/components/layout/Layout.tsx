@@ -2,7 +2,6 @@ import { type ReactNode } from 'react'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
 import { BottomNav } from './BottomNav'
-import { AmbientBackground } from '../ui/AmbientBackground'
 
 interface LayoutProps {
   children: ReactNode
@@ -11,9 +10,6 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-surface relative overflow-hidden">
-      {/* Ambient background effects */}
-      <AmbientBackground />
-
       {/* Desktop sidebar */}
       <Sidebar />
 

@@ -22,7 +22,7 @@ function EqualizerBars({ isPlaying }: { isPlaying: boolean }) {
             height: isPlaying ? undefined : '2px',
             animationDelay: isPlaying ? `${i * 0.08}s` : undefined,
             boxShadow: isPlaying
-              ? '0 0 4px oklch(0.85 0.18 195 / 0.6)'
+              ? '0 0 4px rgb(216 90 48 / 0.6)'
               : 'none',
           }}
         />
@@ -68,8 +68,8 @@ export function MusicBanner({ entityId }: MusicBannerProps) {
           className="absolute inset-0 pointer-events-none"
           style={{
             background: isPlaying
-              ? 'linear-gradient(135deg, oklch(0.85 0.18 195 / 0.1) 0%, transparent 50%)'
-              : 'linear-gradient(135deg, oklch(0.4 0.02 285 / 0.1) 0%, transparent 50%)',
+              ? 'linear-gradient(135deg, rgb(216 90 48 / 0.1) 0%, transparent 50%)'
+              : 'linear-gradient(135deg, rgb(95 94 90 / 0.1) 0%, transparent 50%)',
           }}
         />
 
@@ -86,7 +86,7 @@ export function MusicBanner({ entityId }: MusicBannerProps) {
               )}
               style={{
                 boxShadow: isPlaying
-                  ? '0 0 20px oklch(0.85 0.18 195 / 0.4)'
+                  ? '0 0 20px rgb(216 90 48 / 0.4)'
                   : 'none',
               }}
             >
@@ -107,7 +107,7 @@ export function MusicBanner({ entityId }: MusicBannerProps) {
                 <div
                   className="absolute inset-0 rounded-lg animate-breathe pointer-events-none"
                   style={{
-                    background: 'radial-gradient(circle, oklch(0.85 0.18 195 / 0.2) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgb(216 90 48 / 0.2) 0%, transparent 70%)',
                   }}
                 />
               )}
@@ -170,7 +170,7 @@ export function MusicBanner({ entityId }: MusicBannerProps) {
               )}
               style={{
                 boxShadow: isPlaying
-                  ? '0 0 15px oklch(0.85 0.18 195 / 0.5)'
+                  ? '0 0 15px rgb(216 90 48 / 0.5)'
                   : 'none',
               }}
             >
