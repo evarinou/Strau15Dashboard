@@ -17,6 +17,7 @@ import { clsx } from 'clsx'
 import { Card } from '../components/ui/Card'
 import { useRooms } from '../hooks/useChoreQuest'
 import { useHA } from '../contexts/HomeAssistantContext'
+import { ROOM_LIGHTS, ROOM_SWITCH_LIGHTS, LIGHT_NAMES, type SwitchLight } from '../config/entities'
 
 const roomIcons: Record<string, typeof Sofa> = {
   wohnzimmer: Sofa,
@@ -32,55 +33,16 @@ const roomIcons: Record<string, typeof Sofa> = {
   esszimmer: UtensilsCrossed,
 }
 
-// Map area IDs to light entities
-const ROOM_LIGHTS: Record<string, string[]> = {
-  wohnzimmer: ['light.blumenlampe', 'light.mondschein'],
-  schlafzimmer: ['light.doppellampe', 'light.lampeecke'],
-  bad: ['light.tasmota_waschtisch', 'light.badezimmerd1'],
-  bucherzimmer: ['light.sonoff_bucherzimmer', 'light.hue_filament_bulb'],
-  innenhof: ['light.sonoff_innenhof'],
-  '3d_drucker_zimmer': ['light.a1_03919d4b2001225_druckraumbeleuchtung'],
-}
-
-// Map area IDs to switch-based lights/devices
-const ROOM_SWITCHES: Record<string, { id: string; label: string }[]> = {
-  ankleide: [{ id: 'switch.sonoff_ankleide_ankleide', label: 'Decke' }],
-  esszimmer: [{ id: 'switch.sonoff_esszimmer_esszimmer', label: 'Decke' }],
-  kuche: [{ id: 'switch.sonoff_kueche_kueche', label: 'Decke' }],
-  schlafzimmer: [
-    { id: 'switch.sonoff_schlafzimmer_schlafzimmer', label: 'Decke' },
-    { id: 'switch.0xec1bbdfffefd3660', label: 'Steckdose' },
-  ],
-  bucherzimmer: [{ id: 'switch.steckdosenswitch_buchzimmer', label: 'Steckdose' }],
-  wohnzimmer: [{ id: 'switch.steckdose_wohnzimmer', label: 'Steckdose' }],
-  lukas_buro: [{ id: 'switch.0xb4e3f9fffec0451b', label: 'Schreibtisch' }],
-  '3d_drucker_zimmer': [{ id: 'switch.0x5c0272fffe7f9e5c', label: 'Drucker' }],
-}
-
-// Friendly names for lights
-const LIGHT_NAMES: Record<string, string> = {
-  'light.doppellampe': 'Doppel',
-  'light.blumenlampe': 'Blume',
-  'light.mondschein': 'Mond',
-  'light.lampeecke': 'Ecke',
-  'light.tasmota_waschtisch': 'Wasch',
-  'light.badezimmerd1': 'Decke',
-  'light.sonoff_bucherzimmer': 'Sonoff',
-  'light.hue_filament_bulb': 'Hue',
-  'light.sonoff_innenhof': 'Hof',
-  'light.a1_03919d4b2001225_druckraumbeleuchtung': 'Licht',
-}
-
 export function Rooms() {
   const { data: rooms = [], isLoading } = useRooms()
   const { entities, callService } = useHA()
 
   // Get all devices (lights + switches) for an area
   const getAreaDevices = (areaId: string | null) => {
-    if (!areaId) return { lights: [] as string[], switches: [] as { id: string; label: string }[] }
+    if (!areaId) return { lights: [] as string[], switches: [] as SwitchLight[] }
 
     const lights = ROOM_LIGHTS[areaId] || []
-    const switches = ROOM_SWITCHES[areaId] || []
+    const switches = ROOM_SWITCH_LIGHTS[areaId] || []
 
     return { lights, switches }
   }
@@ -199,7 +161,7 @@ export function Rooms() {
                       })}
 
                       {/* Switches */}
-                      {switches.map(({ id, label }) => {
+                      {switches.map(({ id, shortLabel: label }) => {
                         const entity = entities.get(id)
                         const isOn = entity?.state === 'on'
 

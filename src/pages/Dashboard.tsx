@@ -9,6 +9,7 @@ import { useHA, useWeather } from '../contexts/HomeAssistantContext'
 import { useCurrentUser } from '../contexts/UserContext'
 import type { CompletionResponse } from '../types/chorequest'
 import type { User } from '../types/chorequest'
+import { SCRIPTS, SCENES, WEATHER_ENTITY, WASTE_CALENDAR } from '../config/entities'
 
 // Animated counter hook
 function useAnimatedCounter(target: number, duration: number = 1000) {
@@ -385,7 +386,7 @@ export function Dashboard() {
   const { currentUser, users, setCurrentUser } = useCurrentUser()
   const { data: todayInstances = [], isLoading: tasksLoading } = useTodayInstances()
   const [celebration, setCelebration] = useState<CompletionResponse | null>(null)
-  const weather = useWeather('weather.forecast_home')
+  const weather = useWeather(WEATHER_ENTITY)
 
   // Count active lights
   const activeLights = Array.from(entities.values()).filter(
@@ -426,7 +427,7 @@ export function Dashboard() {
             {/* Left: Weather + Greeting */}
             <div className="flex items-center gap-4">
               {/* Weather Hero */}
-              <WeatherHero entityId="weather.forecast_home" />
+              <WeatherHero entityId={WEATHER_ENTITY} />
 
               {/* Greeting */}
               <div>
@@ -462,16 +463,16 @@ export function Dashboard() {
       <section className="animate-entrance animate-entrance-delay-1">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <ScriptWidget
-            entityId="script.alle_hauptlichter_ein"
+            entityId={SCRIPTS.alleHauptlichterEin}
             icon={<Lightbulb className="w-5 h-5" />}
           />
           <ScriptWidget
-            entityId="script.alle_hauptlichter_aus"
+            entityId={SCRIPTS.alleHauptlichterAus}
             icon={<LightbulbOff className="w-5 h-5" />}
           />
-          <SceneWidget entityId="scene.fernsehabend" />
+          <SceneWidget entityId={SCENES.fernsehabend} />
           <ScriptWidget
-            entityId="script.gute_nacht_routine"
+            entityId={SCRIPTS.guteNachtRoutine}
             icon={<Moon className="w-5 h-5" />}
           />
         </div>
@@ -582,7 +583,7 @@ export function Dashboard() {
           <div className="grid grid-cols-2 gap-3">
             {/* Waste Collection - mini */}
             <WasteCollectionWidget
-              entityId="calendar.landkreis_kronach"
+              entityId={WASTE_CALENDAR}
               entrance
               entranceDelay={5}
               variant="mini"

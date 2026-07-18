@@ -31,8 +31,8 @@ RUN chmod +x /docker-entrypoint.sh
 # Expose port
 EXPOSE 80
 
-# Health check
+# Health check: explizit IPv4 (BusyBox-wget bevorzugt sonst ::1, nginx lauscht ggf. nur IPv4)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+  CMD wget -q -O /dev/null http://127.0.0.1/health || exit 1
 
 ENTRYPOINT ["/docker-entrypoint.sh"]

@@ -18,10 +18,10 @@ docker compose up --build
 
 ## Tech Stack
 
-- **Frontend:** React 18 + TypeScript + Vite
+- **Frontend:** React 19 + TypeScript + Vite 7
 - **Styling:** Tailwind CSS v4 (Dark Theme Default)
 - **State:** TanStack Query + React Context
-- **Routing:** React Router v6
+- **Routing:** React Router v7
 - **Icons:** Lucide React
 - **Container:** Docker + nginx
 
@@ -34,7 +34,7 @@ docker compose up --build
 
 ### ChoreQuest (Haushaltsmanager)
 - **URL:** `http://strau15machine:8007`
-- **Auth:** Bearer Token (same as HA_TOKEN)
+- **Auth:** Bearer Token via `VITE_CHOREQUEST_TOKEN` (separater Token, NICHT der HA-Token!)
 - **OpenAPI:** `/openapi.json`
 
 ## Benutzer
@@ -56,7 +56,7 @@ docker compose up --build
 | esszimmer | Esszimmer | - | - |
 | ankleide | Ankleide | - | - |
 | lukas_buro | Lukas Büro | - | - |
-| 3d_drucker_zimmer | Hurricane 3D Labs | Druckraumbeleuchtung | - |
+| 3d_drucker_zimmer | Hurricane 3D Labs | - (Bambu A1 Drucker, Strom-Switch) | - |
 | werkstatt | Werkstatt | - | - |
 | innenhof | Innenhof | Sonoff-Innenhof | - |
 
@@ -76,8 +76,9 @@ light.tasmota_ventilator
 light.tasmota_waschtisch
 light.sonoff_bucherzimmer
 light.badezimmerd1
-light.a1_03919d4b2001225_druckraumbeleuchtung
 ```
+
+**Hinweis:** Alle hart verdrahteten Entity-IDs liegen zentral in `src/config/entities.ts` (Single Source of Truth).
 
 ### Globale Switches/Scripts
 ```
@@ -96,12 +97,6 @@ media_player.kuche
 media_player.schlafzimmer
 media_player.bad
 media_player.bucherzimmer
-```
-
-### Weitere Geräte
-```
-vacuum.roborock_s7                 # Staubsauger
-climate.0xa4c138543c051cf1         # Thermostat Laden
 ```
 
 ### Szenen
@@ -149,7 +144,8 @@ src/
 │   │   ├── TaskWidget.tsx      # Aufgaben mit Quick-Complete
 │   │   ├── LeaderboardWidget.tsx # Wochenrangliste
 │   │   ├── MediaWidget.tsx     # Sonos-Steuerung
-│   │   └── VacuumWidget.tsx    # Staubsauger-Steuerung
+│   │   └── ...                 # Weather, Alarm, WasteCollection, Printer*
+
 │   └── ui/
 │       ├── Button.tsx
 │       ├── Card.tsx
@@ -172,7 +168,7 @@ src/
 │   ├── homeassistant.ts          # HA Entity Types
 │   └── chorequest.ts             # ChoreQuest API Types
 ├── config/
-│   └── dashboard-config.json     # Widget-Konfiguration pro Raum
+│   └── entities.ts               # Zentrale Entity-IDs (Single Source of Truth)
 ├── App.tsx
 ├── main.tsx
 └── index.css                     # Tailwind + Custom Theme
@@ -271,7 +267,7 @@ const { data: leaderboard } = useWeeklyLeaderboard()
 - Schnellzugriff: Alle Lichter, Szenen, Gute Nacht
 - Heutige Aufgaben mit One-Click Complete
 - Wochenrangliste (Eva-Maria vs Lukas)
-- Staubsauger-Steuerung
+- Müllabholung (calendar.landkreis_kronach) + Wecker-Widget
 
 ### Lichter
 - Grid-Ansicht aller Lichter

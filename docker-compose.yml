@@ -2,17 +2,18 @@ services:
   dashboard:
     build:
       context: .
-      args:
-        - VITE_HA_URL=${VITE_HA_URL:-http://strau15machine:8123}
-        - VITE_HA_WS_URL=${VITE_HA_WS_URL:-ws://strau15machine:8123/api/websocket}
-        - VITE_CHOREQUEST_URL=${VITE_CHOREQUEST_URL:-http://strau15machine:8007}
-        - VITE_HA_TOKEN=${VITE_HA_TOKEN}
     container_name: strau15-dashboard
+    environment:
+      - VITE_HA_URL=${VITE_HA_URL:-http://strau15machine:8123}
+      - VITE_HA_WS_URL=${VITE_HA_WS_URL:-ws://strau15machine:8123/api/websocket}
+      - VITE_HA_TOKEN=${VITE_HA_TOKEN}
+      - VITE_CHOREQUEST_URL=${VITE_CHOREQUEST_URL:-http://strau15machine:8007}
+      - VITE_CHOREQUEST_TOKEN=${VITE_CHOREQUEST_TOKEN}
     ports:
       - "${DASHBOARD_PORT:-3001}:80"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/health"]
       interval: 30s
       timeout: 3s
       retries: 3

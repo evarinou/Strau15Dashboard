@@ -2,14 +2,7 @@ import { VolumeX } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { MediaWidget } from '../components/widgets'
 import { useHA } from '../contexts/HomeAssistantContext'
-
-const MEDIA_PLAYERS = [
-  'media_player.wohnzimmer',
-  'media_player.kuche',
-  'media_player.schlafzimmer',
-  'media_player.bad',
-  'media_player.bucherzimmer',
-]
+import { MEDIA_PLAYERS, SCRIPTS } from '../config/entities'
 
 export function Music() {
   const { entities, callService } = useHA()
@@ -23,7 +16,7 @@ export function Music() {
     callService({
       domain: 'script',
       service: 'turn_on',
-      target: { entity_id: 'script.musik_aus' },
+      target: { entity_id: SCRIPTS.musikAus },
     })
   }
 

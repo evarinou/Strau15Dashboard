@@ -2,39 +2,18 @@ import { Lightbulb, LightbulbOff } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { LightWidget, SwitchLightWidget } from '../components/widgets'
 import { useHA } from '../contexts/HomeAssistantContext'
-
-// Echte light.* Entities
-const LIGHT_ENTITIES = [
-  'light.doppellampe',
-  'light.schlafzimmer_aufwachlicht',
-  'light.alle_nebenlichter',
-  'light.blumenlampe',
-  'light.hue_filament_bulb',
-  'light.mondschein',
-  'light.lampeecke',
-  'light.sonoff_innenhof',
-  'light.tasmota_ventilator',
-  'light.tasmota_waschtisch',
-  'light.sonoff_bucherzimmer',
-  'light.badezimmerd1',
-  'light.a1_03919d4b2001225_druckraumbeleuchtung',
-]
-
-// Switch Entities die als Lichter fungieren
-const SWITCH_LIGHT_ENTITIES: { id: string; label: string }[] = [
-  { id: 'switch.sonoff_ankleide_ankleide', label: 'Ankleide' },
-  { id: 'switch.sonoff_esszimmer_esszimmer', label: 'Esszimmer' },
-  { id: 'switch.sonoff_kueche_kueche', label: 'Küche' },
-  { id: 'switch.sonoff_schlafzimmer_schlafzimmer', label: 'Schlafzimmer Decke' },
-  { id: 'switch.0xb4e3f9fffe7cb0ae', label: 'Treppenhaus' },
-]
+import { LIGHT_ENTITIES, SWITCH_LIGHT_ENTITIES, SCRIPTS } from '../config/entities'
 
 export function Lights() {
   const { entities, callService } = useHA()
 
-  // Count active lights (both light.* and switch lights)
-  const lights = LIGHT_ENTITIES.map((id) => entities.get(id)).filter(Boolean)
-  const switchLights = SWITCH_LIGHT_ENTITIES.map((s) => entities.get(s.id)).filter(Boolean)
+  // Count active lights (both light.* and switch lights); unavailable Geräte zählen nicht zur Basis
+  const lights = LIGHT_ENTITIES.map((id) => entities.get(id)).filter(
+    (l) => l && l.state !== 'unavailable'
+  )
+  const switchLights = SWITCH_LIGHT_ENTITIES.map((s) => entities.get(s.id)).filter(
+    (l) => l && l.state !== 'unavailable'
+  )
 
   const activeLights = lights.filter((l) => l?.state === 'on').length
   const activeSwitchLights = switchLights.filter((l) => l?.state === 'on').length
@@ -45,7 +24,7 @@ export function Lights() {
     callService({
       domain: 'script',
       service: 'turn_on',
-      target: { entity_id: 'script.alle_hauptlichter_ein' },
+      target: { entity_id: SCRIPTS.alleHauptlichterEin },
     })
   }
 
@@ -53,7 +32,7 @@ export function Lights() {
     callService({
       domain: 'script',
       service: 'turn_on',
-      target: { entity_id: 'script.alle_hauptlichter_aus' },
+      target: { entity_id: SCRIPTS.alleHauptlichterAus },
     })
   }
 
