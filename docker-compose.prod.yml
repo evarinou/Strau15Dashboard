@@ -1,0 +1,42 @@
+# Server-Fassung für strau15machine (Dockge/Portainer): zieht das fertige
+# Image von ghcr.io statt zu bauen. Die lokale docker-compose.yml (mit build:)
+# ist nur für die Entwicklung. Deploy: GitHub Actions baut bei Push auf main,
+# Watchtower zieht das neue Image automatisch.
+
+services:
+  dashboard:
+    image: ghcr.io/evarinou/strau15dashboard:latest
+    container_name: strau15-dashboard
+    ports:
+      - "3050:8080"
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Berlin
+      # Pflicht
+      - HA_URL=http://strau15machine:8123
+      - HA_TOKEN=${HA_TOKEN}
+      - CHOREQUEST_URL=http://strau15machine:8007
+      - CHOREQUEST_TOKEN=${CHOREQUEST_TOKEN}
+      # Phase-2-Features (fehlende Werte deaktivieren nur das jeweilige Feature)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - IMMICH_URL=${IMMICH_URL}
+      - IMMICH_API_KEY=${IMMICH_API_KEY}
+      - VIKUNJA_URL=${VIKUNJA_URL}
+      - VIKUNJA_TOKEN=${VIKUNJA_TOKEN}
+      - VIKUNJA_PROJECT=${VIKUNJA_PROJECT:-Strau15}
+      - PAPERLESS_URL=${PAPERLESS_URL}
+      - PAPERLESS_TOKEN=${PAPERLESS_TOKEN}
+      - BRIEFING_TTL_HOURS=${BRIEFING_TTL_HOURS:-6}
+    volumes:
+      - dashboard-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+volumes:
+  dashboard-data:
