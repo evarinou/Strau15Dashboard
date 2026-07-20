@@ -17,7 +17,24 @@ function required(label: string, value: string | undefined): string {
   return value
 }
 
-const haUrl = env('HA_URL', 'VITE_HA_URL') ?? 'http://strau15machine:8123'
+/**
+ * Normalisiert eine Dienst-URL: ergänzt fehlendes http:// und schneidet
+ * abschließende Slashes ab. Ohne Protokoll wirft fetch() nämlich sofort,
+ * bevor überhaupt eine Verbindung versucht wird — das sieht dann wie ein
+ * nicht erreichbarer Dienst aus, obwohl nur das Schema fehlt.
+ */
+function serviceUrl(label: string, value: string | undefined): string | undefined {
+  if (!value) return undefined
+  let url = value.trim().replace(/\/+$/, '')
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(url)) {
+    url = `http://${url}`
+    console.warn(`[config] ${label} ohne Protokoll — verwende ${url}`)
+  }
+  return url
+}
+
+const haUrl =
+  serviceUrl('HA_URL', env('HA_URL', 'VITE_HA_URL')) ?? 'http://strau15machine:8123'
 
 export const config = {
   port: Number(env('PORT') ?? 8080),
@@ -30,7 +47,9 @@ export const config = {
     `${haUrl.replace(/^http/, 'ws')}/api/websocket`,
   haToken: required('HA_TOKEN', env('HA_TOKEN', 'VITE_HA_TOKEN')),
 
-  choreQuestUrl: env('CHOREQUEST_URL', 'VITE_CHOREQUEST_URL') ?? 'http://strau15machine:8007',
+  choreQuestUrl:
+    serviceUrl('CHOREQUEST_URL', env('CHOREQUEST_URL', 'VITE_CHOREQUEST_URL')) ??
+    'http://strau15machine:8007',
   choreQuestToken: required(
     'CHOREQUEST_TOKEN',
     env('CHOREQUEST_TOKEN', 'VITE_CHOREQUEST_TOKEN')
@@ -38,7 +57,7 @@ export const config = {
 
   // Phase-2-Dienste: optional — fehlende Werte deaktivieren nur das Feature.
   anthropicApiKey: env('ANTHROPIC_API_KEY'),
-  immichUrl: env('IMMICH_URL'),
+  immichUrl: serviceUrl('IMMICH_URL', env('IMMICH_URL')),
   immichApiKey: env('IMMICH_API_KEY'),
   /** Optionaler Personen-Filter für „heute vor X Jahren", z.B. "Eva-Maria,Lukas".
    *  Leer = alle Fotos des Tages. Namen wie in Immich benannt. */
@@ -47,10 +66,10 @@ export const config = {
       ?.split(',')
       .map((name) => name.trim())
       .filter(Boolean) ?? [],
-  vikunjaUrl: env('VIKUNJA_URL'),
+  vikunjaUrl: serviceUrl('VIKUNJA_URL', env('VIKUNJA_URL')),
   vikunjaToken: env('VIKUNJA_TOKEN'),
   vikunjaProject: env('VIKUNJA_PROJECT') ?? 'Strau15',
-  paperlessUrl: env('PAPERLESS_URL'),
+  paperlessUrl: serviceUrl('PAPERLESS_URL', env('PAPERLESS_URL')),
   paperlessToken: env('PAPERLESS_TOKEN'),
   briefingTtlHours: Number(env('BRIEFING_TTL_HOURS') ?? 6),
 }
