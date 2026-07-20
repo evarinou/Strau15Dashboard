@@ -21,6 +21,9 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - IMMICH_URL=${IMMICH_URL}
       - IMMICH_API_KEY=${IMMICH_API_KEY}
+      # Optional: nur Fotos mit diesen Personen (Namen wie in Immich benannt).
+      # Leer lassen = alle Fotos des Tages. Prüfen: GET /api/photos/people
+      - IMMICH_PEOPLE=${IMMICH_PEOPLE:-}
       - VIKUNJA_URL=${VIKUNJA_URL}
       - VIKUNJA_TOKEN=${VIKUNJA_TOKEN}
       - VIKUNJA_PROJECT=${VIKUNJA_PROJECT:-Strau15}

@@ -302,7 +302,11 @@ const { data: leaderboard } = useWeeklyLeaderboard()
   via Anthropic-API (`claude-opus-4-8`), Cache in `/data/briefing.json`,
   feste Generierung 06:00/16:00 Europe/Berlin + stale-while-revalidate,
   Nicht-KI-Fallback wenn Anthropic nicht erreichbar
-- Immich-Fotos „heute vor X Jahren" (PhotosCard, Altrosa; Thumbnails via BFF-Proxy)
+- Immich-Fotos „heute vor X Jahren" (PhotosCard, Altrosa; Thumbnails via BFF-Proxy).
+  Optionaler Personen-Filter via `IMMICH_PEOPLE` (Namen wie in Immich benannt,
+  kommagetrennt). Mehrere Namen wirken als ODER — pro Person eine Abfrage, weil
+  Immich mehrere `personIds` mit UND verknüpft. `GET /api/photos/people` listet
+  die erkannten Namen und zeigt, welche greifen.
 - Kalender-Block inkl. Müllabholung (CalendarCard, via HA-REST im BFF)
 - Vikunja-Tasks aus Projekt „Strau15" (VikunjaCard)
 - ChoreQuest: heutige Aufgaben mit One-Click Complete + Wochenrangliste

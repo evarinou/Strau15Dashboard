@@ -40,6 +40,13 @@ export const config = {
   anthropicApiKey: env('ANTHROPIC_API_KEY'),
   immichUrl: env('IMMICH_URL'),
   immichApiKey: env('IMMICH_API_KEY'),
+  /** Optionaler Personen-Filter für „heute vor X Jahren", z.B. "Eva-Maria,Lukas".
+   *  Leer = alle Fotos des Tages. Namen wie in Immich benannt. */
+  immichPeople:
+    env('IMMICH_PEOPLE')
+      ?.split(',')
+      .map((name) => name.trim())
+      .filter(Boolean) ?? [],
   vikunjaUrl: env('VIKUNJA_URL'),
   vikunjaToken: env('VIKUNJA_TOKEN'),
   vikunjaProject: env('VIKUNJA_PROJECT') ?? 'Strau15',
@@ -54,6 +61,7 @@ export function logFeatureStatus(): void {
     chorequest: true,
     briefing: Boolean(config.anthropicApiKey),
     photos: Boolean(config.immichUrl && config.immichApiKey),
+    'photos-personenfilter': config.immichPeople.length > 0,
     tasks: Boolean(config.vikunjaUrl && config.vikunjaToken),
     documents: Boolean(config.paperlessUrl && config.paperlessToken),
   }
