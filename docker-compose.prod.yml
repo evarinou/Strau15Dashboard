@@ -37,6 +37,12 @@ services:
       - PAPERLESS_PUBLIC_URL=${PAPERLESS_PUBLIC_URL:-}
       - VIKUNJA_PUBLIC_URL=${VIKUNJA_PUBLIC_URL:-}
       - CHOREQUEST_PUBLIC_URL=${CHOREQUEST_PUBLIC_URL:-}
+      # Zugriffsschutz für Zugriffe aus dem Internet (siehe SICHERHEIT.md).
+      # AUTH_HEADER = Header, den Authelia nach dem Login setzt. Ohne diesen
+      # Wert ist das Dashboard von außen ungeschützt. Heimnetz bleibt immer frei.
+      - AUTH_HEADER=${AUTH_HEADER:-}
+      # Reverse-Proxy-Hops. NIEMALS "true" — sonst ist die Herkunft fälschbar.
+      - TRUST_PROXY=${TRUST_PROXY:-1}
       - BRIEFING_TTL_HOURS=${BRIEFING_TTL_HOURS:-6}
     volumes:
       - dashboard-data:/data

@@ -33,6 +33,22 @@ function serviceUrl(label: string, value: string | undefined): string | undefine
   return url
 }
 
+/**
+ * `true` ist hier bewusst nicht erlaubt — siehe config.trustProxy.
+ * Zahl = Anzahl vertrauenswürdiger Hops, sonst eine IP/CIDR-Liste.
+ */
+function parseTrustProxy(value: string | undefined): number | string[] {
+  if (!value) return 1
+  if (value === 'false') return 0
+  if (value === 'true') {
+    console.warn('[config] TRUST_PROXY=true ist unsicher (X-Forwarded-For fälschbar) — verwende 1')
+    return 1
+  }
+  const hops = Number(value)
+  if (Number.isInteger(hops) && hops >= 0) return hops
+  return value.split(',').map((entry) => entry.trim()).filter(Boolean)
+}
+
 const haUrl =
   serviceUrl('HA_URL', env('HA_URL', 'VITE_HA_URL')) ?? 'http://strau15machine:8123'
 
@@ -72,6 +88,23 @@ export const config = {
   paperlessUrl: serviceUrl('PAPERLESS_URL', env('PAPERLESS_URL')),
   paperlessToken: env('PAPERLESS_TOKEN'),
   briefingTtlHours: Number(env('BRIEFING_TTL_HOURS') ?? 6),
+
+  /**
+   * Header, den ein vorgeschalteter Authelia (o.ä.) nach dem Login setzt,
+   * z.B. "Remote-User". Ist er gesetzt, brauchen Zugriffe aus dem Internet
+   * diesen Header; das Heimnetz bleibt ohne Login erreichbar.
+   * Nicht gesetzt = kein Schutz (nur für reine LAN-Installationen sinnvoll).
+   */
+  authHeader: env('AUTH_HEADER') ?? null,
+  /**
+   * Wie vielen Proxy-Hops vor dem BFF vertraut wird (Standard: 1 = ein
+   * Reverse Proxy). MUSS eine Zahl oder Proxy-IP sein, niemals `true`:
+   * bei `true` nähme Fastify die linkeste X-Forwarded-For-Adresse, und die
+   * kann jeder Client frei setzen — damit könnte sich ein Zugriff aus dem
+   * Internet als Heimnetz ausgeben und den Schutz aushebeln.
+   * Alternativ eine IP/CIDR-Liste, der vertraut wird ("10.0.0.0/8,192.168.0.0/16").
+   */
+  trustProxy: parseTrustProxy(env('TRUST_PROXY')),
 
   /**
    * Öffentliche URLs für Links im Browser (z.B. https://paperless.strau15.de).

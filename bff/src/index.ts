@@ -16,9 +16,13 @@ import { registerPhotoRoutes } from './routes/photos.js'
 import { registerTaskRoutes } from './routes/tasks.js'
 import { registerDocumentRoutes } from './routes/documents.js'
 import { registerLinkRoutes } from './routes/links.js'
+import { registerAuthGuard } from './lib/auth.js'
 
 const app = Fastify({
   logger: { level: process.env.LOG_LEVEL ?? 'info' },
+  // Ohne trustProxy wäre request.ip immer die des Reverse Proxy — jeder
+  // externe Zugriff sähe dann wie „aus dem Heimnetz" aus.
+  trustProxy: config.trustProxy,
 })
 
 logFeatureStatus()
@@ -33,6 +37,10 @@ await briefing.start()
 
 await app.register(fastifyWebsocket)
 await app.register(fastifyCompress)
+
+// Vor allen Routen: externe Zugriffe brauchen ein Login (siehe lib/auth.ts).
+// Gilt auch für den /ws-Upgrade — der Guard hängt in onRequest.
+registerAuthGuard(app)
 
 registerHealthRoutes(app, ha)
 registerHaRelay(app, ha)
