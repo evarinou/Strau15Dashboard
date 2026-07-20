@@ -6,6 +6,11 @@ erreichbar ist, braucht es kein Login. Sobald es aus dem Internet erreichbar
 ist, gilt die folgende Konfiguration — sonst kann jeder mit der URL das Haus
 schalten und den Kalender mitlesen.
 
+**Status (20.07.2026): eingerichtet und verifiziert.** `home.strau15.de` leitet
+auf HTTPS um und schickt nicht angemeldete Aufrufe zu `auth.strau15.de`. Der
+BFF-Guard ist aktiv — extern ohne Login 403, mit `Remote-User` 200, aus dem
+Heimnetz 200.
+
 ## Wie der Schutz funktioniert
 
 Der BFF unterscheidet nach Herkunft der Anfrage (`bff/src/lib/auth.ts`):
@@ -48,7 +53,7 @@ behaupten. In der Fritz!Box also keine Weiterleitung auf 3050 — nur der Proxy
 ## Authelia im Nginx Proxy Manager
 
 Der Proxy vor dem Dashboard ist openresty (Nginx Proxy Manager). Dort im
-Proxy-Host für `dashboard.strau15.de` unter **Advanced → Custom Nginx
+Proxy-Host für `home.strau15.de` unter **Advanced → Custom Nginx
 Configuration** eintragen:
 
 ```nginx
@@ -94,24 +99,31 @@ location / {
 Wichtig ist der `Upgrade`/`Connection`-Block: ohne ihn kommt der Live-State
 per WebSocket nicht durch und das Dashboard bleibt leer.
 
-## Zusätzlich empfohlen
+## Noch zu prüfen
 
-- **TLS aktivieren.** `https://dashboard.strau15.de` antwortete zuletzt nicht,
-  `http://` dagegen schon — der Verkehr läuft also unverschlüsselt, inklusive
-  Session-Cookies. Im Proxy-Host ein Let's-Encrypt-Zertifikat anfordern und
-  „Force SSL" einschalten.
-- **Alternative ohne Authelia:** Das Dashboard gar nicht nach außen geben und
-  per WireGuard/Tailscale zugreifen. Dann bleibt alles im privaten Adressraum
-  und der Header-Schutz wird nicht gebraucht.
+**Kommt der WebSocket durch Authelia?** Nach dem Login über home.strau15.de
+sollten die Lichter ihren Live-Zustand zeigen. Bleiben sie leer oder auf „Aus"
+stehen, reicht der Proxy die `Upgrade`/`Connection`-Header nicht durch — dann
+den Block oben in der Custom-Nginx-Konfiguration ergänzen.
+
+## Alternative ohne Authelia
+
+Das Dashboard nicht nach außen geben und per WireGuard/Tailscale zugreifen.
+Dann bleibt alles im privaten Adressraum und der Header-Schutz wird nicht
+gebraucht (Tailscale-CGNAT-Adressen gelten als privat).
 
 ## Testen
 
-Nach dem Einrichten von außen (Mobilfunk, nicht WLAN) prüfen:
+Von außen prüfen — über Mobilfunk, nicht im WLAN:
 
 ```bash
-# Ohne Login → 403 oder Weiterleitung zur Anmeldeseite
-curl -s -o /dev/null -w '%{http_code}\n' https://dashboard.strau15.de/api/briefing
+# Ohne Login → 302 zur Anmeldeseite (oder 403, wenn der Aufruf den Proxy umgeht)
+curl -s -o /dev/null -w '%{http_code}\n' https://home.strau15.de/api/briefing
 
 # Heimnetz weiterhin ohne Login erreichbar
 curl -s -o /dev/null -w '%{http_code}\n' http://192.168.178.109:3050/api/briefing
+
+# Guard direkt am Container: gefälschte Heimnetz-Herkunft muss 403 geben
+curl -s -o /dev/null -w '%{http_code}\n' http://192.168.178.109:3050/api/links \
+  -H 'X-Forwarded-For: 192.168.178.50, 203.0.113.7'
 ```
