@@ -72,6 +72,30 @@ export const config = {
   paperlessUrl: serviceUrl('PAPERLESS_URL', env('PAPERLESS_URL')),
   paperlessToken: env('PAPERLESS_TOKEN'),
   briefingTtlHours: Number(env('BRIEFING_TTL_HOURS') ?? 6),
+
+  /**
+   * Öffentliche URLs für Links im Browser (z.B. https://paperless.strau15.de).
+   * Getrennt von den internen Service-URLs: der BFF ruft die Dienste weiter
+   * intern auf, nur die anklickbaren Links zeigen nach außen. Ohne gesetzten
+   * Wert fällt der Link auf die interne URL zurück.
+   */
+  publicUrls: {
+    homeAssistant:
+      serviceUrl('HA_PUBLIC_URL', env('HA_PUBLIC_URL')) ?? haUrl,
+    paperless:
+      serviceUrl('PAPERLESS_PUBLIC_URL', env('PAPERLESS_PUBLIC_URL')) ??
+      serviceUrl('PAPERLESS_URL', env('PAPERLESS_URL')),
+    immich:
+      serviceUrl('IMMICH_PUBLIC_URL', env('IMMICH_PUBLIC_URL')) ??
+      serviceUrl('IMMICH_URL', env('IMMICH_URL')),
+    vikunja:
+      serviceUrl('VIKUNJA_PUBLIC_URL', env('VIKUNJA_PUBLIC_URL')) ??
+      serviceUrl('VIKUNJA_URL', env('VIKUNJA_URL')),
+    choreQuest:
+      serviceUrl('CHOREQUEST_PUBLIC_URL', env('CHOREQUEST_PUBLIC_URL')) ??
+      serviceUrl('CHOREQUEST_URL', env('CHOREQUEST_URL', 'VITE_CHOREQUEST_URL')) ??
+      'http://strau15machine:8007',
+  },
 }
 
 export function logFeatureStatus(): void {

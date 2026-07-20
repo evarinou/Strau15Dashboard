@@ -17,10 +17,11 @@ export function SwitchLightWidget({ entityId, label }: SwitchLightWidgetProps) {
     <Card
       variant="interactive"
       className={clsx(
-        'cursor-pointer select-none',
-        isPressed && 'scale-[0.98]',
-        isUnavailable && 'opacity-50'
+        'select-none',
+        isUnavailable ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+        isPressed && 'scale-[0.98]'
       )}
+      title={isUnavailable ? 'Gerät ist offline und lässt sich gerade nicht schalten' : undefined}
       onClick={() => !isUnavailable && toggle()}
       onMouseDown={() => setIsPressed(true)}
       onMouseUp={() => setIsPressed(false)}

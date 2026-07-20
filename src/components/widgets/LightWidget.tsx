@@ -68,10 +68,11 @@ export function LightWidget({
       glowOnActive={isOn}
       glowColor="warning"
       className={clsx(
-        'cursor-pointer select-none transition-all duration-300',
-        isPressed && 'scale-[0.98]',
-        isUnavailable && 'opacity-50'
+        'select-none transition-all duration-300',
+        isUnavailable ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+        isPressed && 'scale-[0.98]'
       )}
+      title={isUnavailable ? 'Gerät ist offline und lässt sich gerade nicht schalten' : undefined}
       onClick={() => !isUnavailable && toggle()}
       onMouseDown={() => setIsPressed(true)}
       onMouseUp={() => setIsPressed(false)}

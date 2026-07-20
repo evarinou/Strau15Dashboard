@@ -29,6 +29,14 @@ services:
       - VIKUNJA_PROJECT=${VIKUNJA_PROJECT:-Strau15}
       - PAPERLESS_URL=${PAPERLESS_URL}
       - PAPERLESS_TOKEN=${PAPERLESS_TOKEN}
+      # Öffentliche URLs für anklickbare Links im Browser (z.B.
+      # https://paperless.strau15.de). Die internen URLs oben bleiben für die
+      # API-Aufrufe. Nicht gesetzt = Link zeigt auf die interne URL.
+      - HA_PUBLIC_URL=${HA_PUBLIC_URL:-}
+      - IMMICH_PUBLIC_URL=${IMMICH_PUBLIC_URL:-}
+      - PAPERLESS_PUBLIC_URL=${PAPERLESS_PUBLIC_URL:-}
+      - VIKUNJA_PUBLIC_URL=${VIKUNJA_PUBLIC_URL:-}
+      - CHOREQUEST_PUBLIC_URL=${CHOREQUEST_PUBLIC_URL:-}
       - BRIEFING_TTL_HOURS=${BRIEFING_TTL_HOURS:-6}
     volumes:
       - dashboard-data:/data

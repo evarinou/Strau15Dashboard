@@ -77,6 +77,23 @@ export function useVikunjaTasks() {
   })
 }
 
+export interface ServiceLinks {
+  homeAssistant: string
+  paperless: string | null
+  immich: string | null
+  vikunja: string | null
+  choreQuest: string
+}
+
+/** Öffentliche URLs der Hausdienste (z.B. https://immich.strau15.de) */
+export function useLinks() {
+  return useQuery({
+    queryKey: ['bff', 'links'],
+    queryFn: () => fetchBff<ServiceLinks>('/api/links'),
+    staleTime: Infinity,
+  })
+}
+
 export interface PaperlessDocument {
   id: number
   title: string

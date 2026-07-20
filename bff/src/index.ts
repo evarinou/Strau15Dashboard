@@ -15,6 +15,7 @@ import { registerCalendarRoutes } from './routes/calendar.js'
 import { registerPhotoRoutes } from './routes/photos.js'
 import { registerTaskRoutes } from './routes/tasks.js'
 import { registerDocumentRoutes } from './routes/documents.js'
+import { registerLinkRoutes } from './routes/links.js'
 
 const app = Fastify({
   logger: { level: process.env.LOG_LEVEL ?? 'info' },
@@ -42,6 +43,7 @@ registerCalendarRoutes(app)
 registerPhotoRoutes(app)
 registerTaskRoutes(app)
 registerDocumentRoutes(app)
+registerLinkRoutes(app)
 
 // SPA-Auslieferung: Vite hasht Asset-Dateinamen → /assets/* darf aggressiv
 // gecacht werden; index.html nie (sonst zeigt der Browser alte Bundles).

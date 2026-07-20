@@ -12,9 +12,15 @@ import {
   Hammer,
   Sun,
   Printer,
+  HousePlug,
+  Images,
+  FileText,
+  ListTodo,
+  ExternalLink,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { useRooms } from '../../hooks/useChoreQuest'
+import { useLinks } from '../../hooks/useBff'
 
 const mainNavItems = [
   { to: '/', icon: Home, label: 'Übersicht' },
@@ -35,6 +41,17 @@ const roomIcons: Record<string, typeof Home> = {
 
 export function Sidebar() {
   const { data: rooms = [] } = useRooms()
+  const { data: links } = useLinks()
+
+  // Externe Hausdienste — nur anzeigen, was auch konfiguriert ist
+  const services = [
+    { href: links?.homeAssistant, icon: HousePlug, label: 'Home Assistant' },
+    { href: links?.immich, icon: Images, label: 'Fotos' },
+    { href: links?.paperless, icon: FileText, label: 'Dokumente' },
+    { href: links?.vikunja, icon: ListTodo, label: 'Vikunja' },
+  ].filter((service): service is { href: string; icon: typeof Home; label: string } =>
+    Boolean(service.href)
+  )
 
   return (
     <aside className="hidden lg:flex flex-col w-56 h-screen fixed left-0 top-0 z-40 bg-surface border-r border-border">
@@ -98,6 +115,30 @@ export function Sidebar() {
               })}
           </div>
         </div>
+
+        {/* Externe Dienste — öffnen in neuem Tab */}
+        {services.length > 0 && (
+          <div className="mt-6">
+            <h3 className="px-3 mb-2 text-xs font-semibold text-text-secondary uppercase tracking-wider">
+              Dienste
+            </h3>
+            <div className="space-y-1">
+              {services.map(({ href, icon: Icon, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-center gap-3 px-3 py-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors"
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="text-sm flex-1">{label}</span>
+                  <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
     </aside>
   )

@@ -1,11 +1,12 @@
-import { ListTodo } from 'lucide-react'
+import { ListTodo, ExternalLink } from 'lucide-react'
 import { clsx } from 'clsx'
 import { Card, CardHeader, CardTitle } from '../ui/Card'
-import { useVikunjaTasks } from '../../hooks/useBff'
+import { useVikunjaTasks, useLinks } from '../../hooks/useBff'
 
 // Offene Aufgaben aus dem Vikunja-Projekt „Strau15" (read-only Liste).
 export function VikunjaCard() {
   const { data } = useVikunjaTasks()
+  const { data: links } = useLinks()
 
   if (!data) return null
 
@@ -15,11 +16,24 @@ export function VikunjaCard() {
     <Card padding="lg">
       <CardHeader>
         <CardTitle>Projekt Strau15</CardTitle>
-        {data.tasks.length > 0 && (
-          <span className="text-xs bg-accent/10 text-accent-soft px-2 py-0.5 rounded-full">
-            {data.tasks.length} offen
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {data.tasks.length > 0 && (
+            <span className="text-xs bg-accent/10 text-accent-soft px-2 py-0.5 rounded-full">
+              {data.tasks.length} offen
+            </span>
+          )}
+          {links?.vikunja && (
+            <a
+              href={links.vikunja}
+              target="_blank"
+              rel="noreferrer"
+              className="text-text-secondary hover:text-accent transition-colors"
+              title="Vikunja öffnen"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          )}
+        </div>
       </CardHeader>
       {tasks.length === 0 ? (
         <p className="text-sm text-text-secondary">Nichts offen — gut gemacht.</p>

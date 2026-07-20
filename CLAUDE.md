@@ -315,6 +315,13 @@ const { data: leaderboard } = useWeeklyLeaderboard()
 - Fehlt eine Server-Env-Var, liefert der BFF 503 {disabled:true} und die
   jeweilige Karte blendet sich aus (Hooks in `src/hooks/useBff.ts`)
 
+**Externe Links:** `*_PUBLIC_URL`-Variablen (HA/IMMICH/PAPERLESS/VIKUNJA/
+CHOREQUEST) trennen die im Browser anklickbaren Domains von den internen
+Service-URLs, die der BFF für seine API-Aufrufe nutzt. `GET /api/links`
+liefert sie ans Frontend (Hook `useLinks`); ohne gesetzten Wert fällt der
+Link auf die interne URL zurück. Genutzt in der Sidebar-Sektion „Dienste",
+der Foto-Karte (Deep-Link je Bild) sowie Vikunja- und Paperless-Karte.
+
 ### Lichter
 - Grid-Ansicht aller Lichter
 - Toggle + Brightness Slider

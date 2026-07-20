@@ -37,8 +37,9 @@ export function registerDocumentRoutes(app: FastifyInstance): void {
           title: doc.title,
           created: doc.created,
         })),
-        // Link-Basis für „in Paperless öffnen" (read-only Verweis, kein Token)
-        baseUrl: config.paperlessUrl,
+        // Öffentliche Link-Basis für „in Paperless öffnen" (kein Token) —
+        // im Browser soll die erreichbare Domain stehen, nicht die interne URL
+        baseUrl: config.publicUrls.paperless,
       }
     } catch (err) {
       request.log.warn({ err }, 'Paperless nicht erreichbar')
