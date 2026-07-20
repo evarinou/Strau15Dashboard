@@ -1,9 +1,32 @@
 import { Card } from '../ui/Card'
-import { usePhotos, useLinks } from '../../hooks/useBff'
+import { usePhotos, useLinks, type MemoryPhoto } from '../../hooks/useBff'
+
+function jahreDiff(year: number): number {
+  return new Date().getFullYear() - year
+}
 
 function jahreLabel(year: number): string {
-  const diff = new Date().getFullYear() - year
+  const diff = jahreDiff(year)
   return `vor ${diff} ${diff === 1 ? 'Jahr' : 'Jahren'}`
+}
+
+/**
+ * Wählt die Bilder für die Karte: erst ein Foto je Jahrgang (jüngster zuerst),
+ * danach mit weiteren Bildern auffüllen. Ohne diese Streuung zeigt die Karte
+ * an manchen Tagen dreimal denselben Nachmittag, obwohl auch ältere Jahrgänge
+ * Treffer hätten — und genau die Zeitspanne ist ja der Reiz.
+ */
+function waehleFotos(photos: MemoryPhoto[], anzahl: number): MemoryPhoto[] {
+  const proJahr = new Map<number, MemoryPhoto>()
+  for (const photo of photos) {
+    if (!proJahr.has(photo.year)) proJahr.set(photo.year, photo)
+  }
+  const auswahl = [...proJahr.values()]
+  if (auswahl.length < anzahl) {
+    const bereitsDrin = new Set(auswahl.map((p) => p.id))
+    auswahl.push(...photos.filter((p) => !bereitsDrin.has(p.id)))
+  }
+  return auswahl.slice(0, anzahl)
 }
 
 // „Heute vor X Jahren" — Immich-Erinnerungen im zarten Altrosa.
@@ -16,7 +39,7 @@ export function PhotosCard() {
   // Feature deaktiviert oder (noch) keine Fotos für diesen Tag → Karte weglassen
   if (!data || data.photos.length === 0) return null
 
-  const [hero, ...weitere] = data.photos.slice(0, 5)
+  const [hero, ...weitere] = waehleFotos(data.photos, 3)
   const immich = links?.immich
   const photoHref = (id: string) => (immich ? `${immich}/photos/${id}` : undefined)
 
@@ -24,8 +47,7 @@ export function PhotosCard() {
     <Card tone="photo" padding="lg" className="lg:col-span-2">
       <div className="flex items-baseline justify-between gap-3 mb-3">
         <h3 className="font-serif text-photo-ink text-xl" style={{ fontWeight: 520 }}>
-          Heute vor {new Date().getFullYear() - hero.year}{' '}
-          {new Date().getFullYear() - hero.year === 1 ? 'Jahr' : 'Jahren'}
+          Heute {jahreLabel(hero.year)}
         </h3>
         {immich && (
           <a
@@ -46,7 +68,7 @@ export function PhotosCard() {
           target="_blank"
           rel="noreferrer"
           className="sm:col-span-2 block group"
-          aria-label={`Foto aus ${hero.year} in Immich öffnen`}
+          aria-label={`Foto von heute ${jahreLabel(hero.year)} in Immich öffnen`}
         >
           <img
             src={`/api/photos/${hero.id}/thumbnail`}
@@ -56,25 +78,30 @@ export function PhotosCard() {
           />
         </a>
 
-        {/* Weitere Erinnerungen — gestapelt daneben */}
+        {/* Weitere Jahrgänge — gestapelt daneben, jeweils mit Jahresangabe,
+            damit die Überschrift des Hauptbilds sie nicht falsch beschriftet */}
         {weitere.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-1 sm:grid-rows-2 gap-3">
-            {weitere.slice(0, 2).map((photo) => (
+          <div className="grid grid-cols-2 sm:grid-cols-1 sm:grid-rows-2 gap-3">
+            {weitere.map((photo) => (
               <a
                 key={photo.id}
                 href={photoHref(photo.id)}
                 target="_blank"
                 rel="noreferrer"
-                className="block group min-w-0"
-                aria-label={`Foto aus ${photo.year} in Immich öffnen`}
+                className="relative block group min-w-0 overflow-hidden rounded-lg"
+                aria-label={`Foto von heute ${jahreLabel(photo.year)} in Immich öffnen`}
               >
                 <img
                   src={`/api/photos/${photo.id}/thumbnail`}
                   alt={`Erinnerung aus ${photo.year}`}
                   loading="lazy"
-                  className="w-full h-full aspect-square sm:aspect-auto object-cover rounded-lg transition-transform duration-300 group-hover:scale-[1.02]"
+                  className="w-full h-full aspect-square sm:aspect-auto object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                 />
-                <span className="sr-only">{jahreLabel(photo.year)}</span>
+                {photo.year !== hero.year && (
+                  <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-photo-ink/70 text-white text-[10px] font-medium">
+                    {jahreLabel(photo.year)}
+                  </span>
+                )}
               </a>
             ))}
           </div>
