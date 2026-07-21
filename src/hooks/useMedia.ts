@@ -26,3 +26,27 @@ export function useMediaWatching() {
     refetchInterval: 10 * 60 * 1000,
   })
 }
+
+export interface UpcomingItem {
+  source: 'sonarr' | 'radarr'
+  id: number
+  title: string
+  subtitle: string | null
+  date: string
+  hasFile: boolean
+  image: string
+}
+
+export interface UpcomingResponse {
+  items: UpcomingItem[]
+  /** false = Dienst konfiguriert, aber gerade nicht erreichbar */
+  sources: { sonarr: boolean; radarr: boolean }
+}
+
+export function useMediaUpcoming(days = 14) {
+  return useQuery({
+    queryKey: ['bff', 'media', 'upcoming', days],
+    queryFn: () => fetchBff<UpcomingResponse>(`/api/media/upcoming?days=${days}`),
+    staleTime: 15 * 60 * 1000,
+  })
+}

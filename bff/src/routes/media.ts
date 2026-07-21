@@ -138,6 +138,152 @@ async function fetchJellyfin(path: string): Promise<JellyfinItem[]> {
 }
 
 // ---------------------------------------------------------------------------
+// Sonarr/Radarr — „Was kommt?"
+// ---------------------------------------------------------------------------
+
+function sonarrEnabled(): boolean {
+  return Boolean(config.sonarrUrl && config.sonarrApiKey)
+}
+
+function radarrEnabled(): boolean {
+  return Boolean(config.radarrUrl && config.radarrApiKey)
+}
+
+interface UpcomingItem {
+  source: 'sonarr' | 'radarr'
+  /** seriesId bzw. movieId — Schlüssel für den Poster-Proxy */
+  id: number
+  title: string
+  subtitle: string | null
+  date: string
+  hasFile: boolean
+  image: string
+}
+
+interface SonarrEpisode {
+  title: string
+  seriesId: number
+  seasonNumber: number
+  episodeNumber: number
+  airDateUtc?: string
+  hasFile: boolean
+  series?: { title?: string }
+}
+
+async function fetchSonarrUpcoming(start: string, end: string): Promise<UpcomingItem[]> {
+  const response = await fetch(
+    `${config.sonarrUrl}/api/v3/calendar?start=${start}&end=${end}&includeSeries=true`,
+    { headers: { 'X-Api-Key': config.sonarrApiKey! }, signal: AbortSignal.timeout(10_000) }
+  )
+  if (!response.ok) throw new Error(`Sonarr-Kalender: ${response.status}`)
+  const episodes = (await response.json()) as SonarrEpisode[]
+  return episodes
+    .filter((episode) => episode.airDateUtc)
+    .map((episode) => ({
+      source: 'sonarr' as const,
+      id: episode.seriesId,
+      title: episode.series?.title ?? episode.title,
+      subtitle:
+        `S${episode.seasonNumber} · E${episode.episodeNumber}` +
+        (episode.title && episode.title !== 'TBA' ? ` — ${episode.title}` : ''),
+      date: episode.airDateUtc!,
+      hasFile: episode.hasFile,
+      image: `/api/media/poster/sonarr/${episode.seriesId}`,
+    }))
+}
+
+interface RadarrMovie {
+  id: number
+  title: string
+  inCinemas?: string
+  digitalRelease?: string
+  physicalRelease?: string
+  hasFile: boolean
+}
+
+/**
+ * Ein Film kann mehrere Release-Termine haben (Kino/Digital/Disc). Gezeigt
+ * wird der nächste, der ins Fenster fällt — Radarr liefert den Film ja genau
+ * deshalb im Kalender. Ohne Termin im Fenster wird der Eintrag verworfen.
+ */
+function nextRadarrRelease(
+  movie: RadarrMovie,
+  start: string,
+  end: string
+): { date: string; label: string } | null {
+  const candidates = [
+    { date: movie.inCinemas, label: 'Kino' },
+    { date: movie.digitalRelease, label: 'Digital' },
+    { date: movie.physicalRelease, label: 'Disc' },
+  ]
+    .filter((c): c is { date: string; label: string } => Boolean(c.date))
+    .filter((c) => c.date >= start && c.date <= `${end}T23:59:59Z`)
+    .sort((a, b) => a.date.localeCompare(b.date))
+  return candidates[0] ?? null
+}
+
+async function fetchRadarrUpcoming(start: string, end: string): Promise<UpcomingItem[]> {
+  const response = await fetch(
+    `${config.radarrUrl}/api/v3/calendar?start=${start}&end=${end}`,
+    { headers: { 'X-Api-Key': config.radarrApiKey! }, signal: AbortSignal.timeout(10_000) }
+  )
+  if (!response.ok) throw new Error(`Radarr-Kalender: ${response.status}`)
+  const movies = (await response.json()) as RadarrMovie[]
+  return movies.flatMap((movie) => {
+    const release = nextRadarrRelease(movie, start, end)
+    if (!release) return []
+    return [
+      {
+        source: 'radarr' as const,
+        id: movie.id,
+        title: movie.title,
+        subtitle: release.label,
+        date: release.date,
+        hasFile: movie.hasFile,
+        image: `/api/media/poster/radarr/${movie.id}`,
+      },
+    ]
+  })
+}
+
+/** Byte-Proxy für Sonarr/Radarr-Poster — gleiche Form wie der Jellyfin-Proxy. */
+function registerPosterProxy(
+  app: FastifyInstance,
+  source: 'sonarr' | 'radarr',
+  enabled: () => boolean,
+  baseUrl: () => string,
+  apiKey: () => string
+): void {
+  app.get(`/api/media/poster/${source}/:id`, async (request, reply) => {
+    if (!enabled()) {
+      reply.status(503)
+      return { disabled: true }
+    }
+
+    const { id } = request.params as { id: string }
+    if (!/^\d+$/.test(id)) {
+      reply.status(400)
+      return { error: 'Ungültige Poster-ID' }
+    }
+
+    try {
+      const response = await fetch(`${baseUrl()}/api/v3/mediacover/${id}/poster-250.jpg`, {
+        headers: { 'X-Api-Key': apiKey() },
+        signal: AbortSignal.timeout(15_000),
+      })
+      reply.status(response.status)
+      reply.header('content-type', response.headers.get('content-type') ?? 'image/jpeg')
+      reply.header('cache-control', 'private, max-age=86400')
+      return reply.send(Buffer.from(await response.arrayBuffer()))
+    } catch (err) {
+      request.log.warn({ err }, `${source}-Poster fehlgeschlagen`)
+      reply.status(502)
+      return { error: `${source} nicht erreichbar` }
+    }
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Routen
 // ---------------------------------------------------------------------------
 
@@ -171,6 +317,50 @@ export function registerMediaRoutes(app: FastifyInstance): void {
       return { error: 'Jellyfin nicht erreichbar' }
     }
   })
+
+  app.get('/api/media/upcoming', async (request, reply) => {
+    // Der Bereich ist aktiv, sobald EINER der beiden Dienste konfiguriert ist
+    if (!sonarrEnabled() && !radarrEnabled()) {
+      reply.status(503)
+      return { disabled: true }
+    }
+
+    const days = Math.min(Number((request.query as { days?: string }).days ?? 14), 60)
+    const start = new Date().toISOString().slice(0, 10)
+    const end = new Date(Date.now() + days * 24 * 3600 * 1000).toISOString().slice(0, 10)
+
+    const results = await Promise.allSettled([
+      sonarrEnabled() ? fetchSonarrUpcoming(start, end) : Promise.resolve([]),
+      radarrEnabled() ? fetchRadarrUpcoming(start, end) : Promise.resolve([]),
+    ])
+    const [sonarrResult, radarrResult] = results
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        request.log.warn({ err: result.reason }, 'Medien-Kalender teilweise nicht erreichbar')
+      }
+    }
+
+    // Beide konfigurierten Quellen down → 502; eine down → Rest liefern und
+    // im sources-Objekt kenntlich machen (die Karte kann das anmerken).
+    const items = results
+      .filter((r): r is PromiseFulfilledResult<UpcomingItem[]> => r.status === 'fulfilled')
+      .flatMap((r) => r.value)
+      .sort((a, b) => a.date.localeCompare(b.date))
+    const sources = {
+      sonarr: sonarrEnabled() && sonarrResult.status === 'fulfilled',
+      radarr: radarrEnabled() && radarrResult.status === 'fulfilled',
+    }
+    if (!sources.sonarr && !sources.radarr) {
+      reply.status(502)
+      return { error: 'Sonarr/Radarr nicht erreichbar' }
+    }
+
+    reply.header('cache-control', 'private, max-age=300')
+    return { items, sources }
+  })
+
+  registerPosterProxy(app, 'sonarr', sonarrEnabled, () => config.sonarrUrl!, () => config.sonarrApiKey!)
+  registerPosterProxy(app, 'radarr', radarrEnabled, () => config.radarrUrl!, () => config.radarrApiKey!)
 
   app.get('/api/media/image/jellyfin/:id', async (request, reply) => {
     if (!jellyfinEnabled()) {
