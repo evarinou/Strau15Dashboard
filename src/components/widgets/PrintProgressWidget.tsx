@@ -64,8 +64,8 @@ export function PrintProgressWidget({
     <div
       className={clsx(
         'p-4 rounded-xl transition-all duration-300',
-        isPrinting && 'border-glow-accent',
-        isFinished && 'border-glow-success',
+        isPrinting && '',
+        isFinished && '',
         isError && 'bg-danger/5 border border-danger/30',
         !isPrinting && !isFinished && !isError && 'bg-surface-elevated/50',
         className
@@ -76,13 +76,13 @@ export function PrintProgressWidget({
         <div className="flex items-center gap-2 mb-3">
           <FileBox className={clsx(
             'w-4 h-4',
-            isPrinting && 'text-accent icon-glow-accent',
+            isPrinting && 'text-accent',
             isFinished && 'text-success',
             isError && 'text-danger'
           )} />
           <span className={clsx(
             'text-sm font-medium truncate',
-            isPrinting && 'text-glow-accent'
+            isPrinting && ''
           )}>
             {jobName}
           </span>
@@ -107,9 +107,9 @@ export function PrintProgressWidget({
           style={{
             width: `${displayProgress}%`,
             boxShadow: isPrinting
-              ? '0 0 15px rgb(216 90 48 / 0.5)'
+              ? '0 0 15px rgb(from var(--color-accent) r g b / 0.5)'
               : isFinished
-                ? '0 0 15px rgb(76 122 92 / 0.5)'
+                ? '0 0 15px rgb(from var(--color-success) r g b / 0.5)'
                 : undefined,
           }}
         />
@@ -130,7 +130,7 @@ export function PrintProgressWidget({
           className={clsx(
             'text-lg font-bold tabular-nums',
             `text-${statusColor}`,
-            isPrinting && 'text-glow-accent'
+            isPrinting && ''
           )}
         >
           {Math.round(displayProgress)}%

@@ -44,9 +44,9 @@ export function PhotosCard() {
   const photoHref = (id: string) => (immich ? `${immich}/photos/${id}` : undefined)
 
   return (
-    <Card tone="photo" padding="lg" className="lg:col-span-2">
+    <Card tone="photo" padding="lg">
       <div className="flex items-baseline justify-between gap-3 mb-3">
-        <h3 className="font-serif text-photo-ink text-xl" style={{ fontWeight: 520 }}>
+        <h3 className="font-display font-bold text-photo-ink text-xl">
           Heute {jahreLabel(hero.year)}
         </h3>
         {immich && (

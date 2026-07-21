@@ -51,12 +51,15 @@ export function Room() {
       <div className="flex items-center gap-3">
         <Link
           to="/rooms"
-          className="p-2 -ml-2 rounded-lg hover:bg-surface-hover transition-colors"
+          className="glass-inset w-10 h-10 flex items-center justify-center rounded-full text-ink hover:bg-white/90 transition-colors shrink-0"
+          aria-label="Zurück zur Raumübersicht"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">{room.name}</h1>
+          <h1 className="font-display text-3xl lg:text-4xl font-extrabold tracking-[-0.03em] text-ink">
+            {room.name}
+          </h1>
           {!is3DPrinterRoom && (
             <p className="text-text-secondary">
               {totalLights > 0 && `${totalLights} Licht${totalLights > 1 ? 'er' : ''}`}

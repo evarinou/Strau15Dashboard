@@ -19,14 +19,14 @@ function EqualizerBars({ isPlaying }: { isPlaying: boolean }) {
         <div
           key={i}
           className={clsx(
-            'w-1 bg-neon-cyan rounded-full transition-all',
+            'w-1 bg-accent rounded-full transition-all',
             isPlaying ? 'animate-[eq-bar_0.5s_ease-in-out_infinite]' : 'h-1'
           )}
           style={{
             height: isPlaying ? undefined : '4px',
             animationDelay: isPlaying ? `${i * 0.1}s` : undefined,
             boxShadow: isPlaying
-              ? '0 0 6px rgb(216 90 48 / 0.6)'
+              ? '0 0 6px rgb(from var(--color-accent) r g b / 0.6)'
               : 'none',
           }}
         />
@@ -69,23 +69,23 @@ export function MediaWidget({
         entrance={entrance}
         entranceDelay={entranceDelay}
         glowOnActive={isPlaying}
-        glowColor="cyan"
+        glowColor="accent"
         onClick={() => (isPlaying ? pause() : play())}
       >
         <div className="flex items-center gap-3">
           <div
             className={clsx(
               'relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300',
-              isPlaying ? 'bg-neon-cyan/20 text-neon-cyan' : 'bg-surface-hover text-text-secondary'
+              isPlaying ? 'bg-accent/15 text-accent' : 'bg-surface-hover text-text-secondary'
             )}
             style={{
               boxShadow: isPlaying
-                ? '0 0 15px rgb(216 90 48 / 0.4)'
+                ? '0 0 15px rgb(from var(--color-accent) r g b / 0.4)'
                 : 'none',
             }}
           >
             {isPlaying ? (
-              <Pause className="w-5 h-5 icon-glow-cyan" />
+              <Pause className="w-5 h-5" />
             ) : (
               <Play className="w-5 h-5" />
             )}
@@ -94,7 +94,7 @@ export function MediaWidget({
               <div
                 className="absolute inset-0 rounded-full animate-breathe"
                 style={{
-                  background: 'radial-gradient(circle, rgb(216 90 48 / 0.3) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, rgb(from var(--color-accent) r g b / 0.3) 0%, transparent 70%)',
                 }}
               />
             )}
@@ -103,7 +103,7 @@ export function MediaWidget({
             <p
               className={clsx(
                 'text-sm font-medium truncate transition-all duration-300',
-                isPlaying && 'text-glow-cyan'
+                isPlaying && ''
               )}
             >
               {friendlyName}
@@ -121,18 +121,18 @@ export function MediaWidget({
   }
 
   return (
-    <Card entrance={entrance} entranceDelay={entranceDelay} glowOnActive={isPlaying} glowColor="cyan">
+    <Card entrance={entrance} entranceDelay={entranceDelay} glowOnActive={isPlaying} glowColor="accent">
       <div className="flex flex-col gap-3">
         {/* Now playing info */}
         <div className="flex items-center gap-3">
           <div
             className={clsx(
               'relative w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-300',
-              isPlaying ? 'bg-neon-cyan/20' : 'bg-surface-hover'
+              isPlaying ? 'bg-accent/15' : 'bg-surface-hover'
             )}
             style={{
               boxShadow: isPlaying
-                ? '0 0 20px rgb(216 90 48 / 0.3)'
+                ? '0 0 20px rgb(from var(--color-accent) r g b / 0.3)'
                 : 'none',
             }}
           >
@@ -146,7 +146,7 @@ export function MediaWidget({
             <p
               className={clsx(
                 'text-sm font-medium truncate transition-all duration-300',
-                isPlaying && 'text-glow-cyan'
+                isPlaying && ''
               )}
             >
               {friendlyName}
@@ -155,7 +155,7 @@ export function MediaWidget({
               <p
                 className={clsx(
                   'text-xs truncate transition-all duration-300',
-                  isPlaying ? 'text-neon-cyan' : 'text-accent'
+                  isPlaying ? 'text-accent' : 'text-accent'
                 )}
               >
                 {mediaTitle}
@@ -182,12 +182,12 @@ export function MediaWidget({
             className={clsx(
               'p-3 rounded-full transition-all duration-300',
               isPlaying
-                ? 'bg-neon-cyan text-white'
-                : 'bg-surface-hover text-text-primary hover:bg-neon-cyan hover:text-white'
+                ? 'bg-accent text-on-fill'
+                : 'bg-surface-hover text-text-primary hover:bg-accent hover:text-on-fill'
             )}
             style={{
               boxShadow: isPlaying
-                ? '0 0 20px rgb(216 90 48 / 0.5)'
+                ? '0 0 20px rgb(from var(--color-accent) r g b / 0.5)'
                 : 'none',
             }}
           >
@@ -208,13 +208,13 @@ export function MediaWidget({
             onClick={() => setVolume(isMuted ? 0.5 : 0)}
             className={clsx(
               'p-1.5 rounded hover:bg-surface-hover transition-all duration-200',
-              isMuted || volumePercent === 0 ? 'text-text-secondary' : 'text-neon-cyan'
+              isMuted || volumePercent === 0 ? 'text-text-secondary' : 'text-accent'
             )}
           >
             {isMuted || volumePercent === 0 ? (
               <VolumeX className="w-4 h-4" />
             ) : (
-              <Volume2 className="w-4 h-4 icon-glow-cyan" />
+              <Volume2 className="w-4 h-4" />
             )}
           </button>
           <Slider
@@ -228,7 +228,7 @@ export function MediaWidget({
           <span
             className={clsx(
               'text-xs w-8 text-right tabular-nums',
-              volumePercent > 0 ? 'text-neon-cyan' : 'text-text-secondary'
+              volumePercent > 0 ? 'text-accent' : 'text-text-secondary'
             )}
           >
             {volumePercent}%

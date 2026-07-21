@@ -1,60 +1,84 @@
 @import "tailwindcss";
 /* Self-hosted Variable Fonts (kein CDN — offline-robust) */
-@import "@fontsource-variable/fraunces";
-@import "@fontsource-variable/source-sans-3";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/plus-jakarta-sans";
 
 @theme {
   /* ============================================================
-     Design-Sprache „Warm & wohnlich" — editorial, passend zum
-     Haus von 1842. Serif (Fraunces) NUR für Begrüßung + Briefing,
-     alles Funktionale in Source Sans 3.
+     Design-Sprache „Tageslicht" — Pastell-Glas.
+     Der Grund ist ein weiches Verlaufsmesh, das der Tageszeit
+     folgt (siehe html[data-daylight] weiter unten); darauf sitzen
+     frosted-glass Panels. Display-Schrift Bricolage Grotesque nur
+     für Überschriften und große Zahlen, alles übrige Plus Jakarta.
      ============================================================ */
 
-  /* Base Colors */
-  --color-surface: #F1EFE8;           /* Grundfläche Sandbeige */
-  --color-surface-elevated: #FAF7F0;  /* Cards cremeweiß */
-  --color-surface-hover: #EAE7DD;     /* Hover: abgedunkelte Grundfläche */
-  --color-border: #D3D1C7;
-  --color-text-primary: #2C2C2A;
-  --color-text-secondary: #5F5E5A;    /* warmes Grau */
-  --color-accent: #D85A30;            /* Terrakotta */
-  --color-accent-hover: #C24E28;
-  --color-success: #4C7A5C;           /* für hellen Grund rekalibriert */
-  --color-warning: #A8752B;
-  --color-danger: #B23B2E;
+  /* Text — violett-getöntes Tintenschwarz statt Neutralgrau */
+  --color-ink: #241C2E;               /* Headlines, große Zahlen */
+  --color-text-primary: #2E2739;      /* Fließtext */
+  --color-text-secondary: #59506A;    /* Labels */
+  --color-text-muted: #5F566F;        /* Meta, Zeitstempel */
 
-  /* Editorial-Töne: Text auf farbigen Flächen */
-  --color-accent-ink: #4A1B0C;        /* dunkles Terrakotta, stark */
-  --color-accent-text: #712B13;
-  --color-accent-soft: #993C1D;
+  /* Akzent: Koralle — trägt die Wärme des alten Terrakotta weiter.
+     Der Ton ist so weit abgedunkelt, dass er in beiden Rollen AA
+     erfüllt: als Textfarbe auf Glas und als Fläche unter weißem Text. */
+  --color-accent: #AE3018;
+  --color-accent-hover: #96270F;
 
-  /* Foto-Block (zartes Altrosa) */
-  --color-photo-surface: #FBEAF0;
-  --color-photo-ink: #4B1528;
-  --color-photo-text: #993556;
+  /* Schrift auf gesättigten Flächen (Knöpfe, Badges). Tagsüber sind
+     die Füllfarben dunkel genug für Weiß — nachts werden sie hell
+     aufgezogen, dort muss die Schrift dunkel werden. */
+  --color-on-fill: #FFFFFF;
+
+  /* Status: gedeckt für Text, gesättigt für Flächen */
+  --color-success: #0F6247;
+  --color-success-fill: #34C79A;
+  --color-warning: #7E5200;
+  --color-warning-fill: #F5A623;
+  /* Himbeere statt Rot: der frühere Ton lag nur 25° vom Akzent
+     entfernt, „Löschen" und „Primär" sahen als Knopf fast gleich
+     aus. Jetzt sind es 45° — unterscheidbar, ohne die Palette zu
+     verlassen. */
+  --color-danger: #9C1866;
+  --color-danger-fill: #FF6BA8;
+
+  /* Flächen: „surface" bleibt als Token bestehen, meint jetzt aber
+     Glas — die Alt-Klassen im Bestand treffen damit weiter zu. */
+  --color-surface: transparent;       /* der Mesh liegt darunter */
+  --color-surface-elevated: var(--glass-2);
+  --color-surface-hover: rgb(255 255 255 / 0.42);
+  --color-border: rgb(255 255 255 / 0.45);
 
   /* Typografie */
-  --font-serif: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Source Sans 3 Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --font-serif: var(--font-display);  /* Alt-Klasse font-serif → Display */
 
-  /* Alt-Tokens (deprecated): auf ruhige warme Werte remappt, damit
-     bestehende neon-/glass-/glow-Klassen nicht brechen. Werden beim
-     widget-weisen Rollout des neuen Card-Musters zurückgebaut. */
-  --color-neon-cyan: #5F5E5A;
-  --color-neon-magenta: #993556;
-  --color-neon-purple: #712B13;
-  --glass-bg: #FAF7F0;
-  --glass-bg-heavy: #FAF7F0;
-  --glass-border: #D3D1C7;
-  --shadow-glow-accent: 0 1px 3px rgb(44 44 42 / 0.10);
-  --shadow-glow-accent-strong: 0 2px 6px rgb(44 44 42 / 0.12);
-  --shadow-glow-warning: 0 1px 3px rgb(44 44 42 / 0.10);
-  --shadow-glow-warning-strong: 0 2px 6px rgb(44 44 42 / 0.12);
-  --shadow-glow-success: 0 1px 3px rgb(44 44 42 / 0.10);
-  --shadow-glow-cyan: 0 1px 3px rgb(44 44 42 / 0.10);
-  --shadow-glow-magenta: 0 1px 3px rgb(44 44 42 / 0.10);
-  --shadow-float: 0 4px 16px rgb(44 44 42 / 0.08);
-  --shadow-float-lg: 0 8px 24px rgb(44 44 42 / 0.10);
+  /* Form: eigene Namen, damit Tailwinds Radius- und Blur-Skalen
+     unangetastet bleiben (sonst würde jedes rounded-lg mitwachsen) */
+  --r-tile: 20px;
+  --r-panel: 24px;
+  --r-plate: 32px;
+  --glass-blur-sm: 10px;
+  --glass-blur-md: 20px;
+  --glass-blur-lg: 32px;
+
+  --shadow-glass:
+    0 8px 32px rgb(84 60 118 / 0.10),
+    0 2px 8px rgb(84 60 118 / 0.06),
+    inset 0 1px 0 var(--glass-edge-top),
+    inset 0 0 0 1px rgb(255 255 255 / 0.30);
+  --shadow-plate:
+    0 32px 80px rgb(84 60 118 / 0.16),
+    inset 0 1px 0 var(--glass-edge-top);
+  --shadow-pill:
+    0 2px 8px rgb(84 60 118 / 0.12),
+    inset 0 1px 0 rgb(255 255 255 / 0.85);
+  --shadow-float: 0 4px 16px rgb(84 60 118 / 0.10);
+  --shadow-float-lg: 0 8px 24px rgb(84 60 118 / 0.14);
+
+  /* Foto-Block „heute vor X Jahren": Tinte auf dem Altrosa-Glas. */
+  --color-photo-ink: var(--color-ink);
+  --color-photo-text: #A63A63;
 
   /* Animation Easings */
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -62,9 +86,226 @@
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ============================================================
+   TAGPHASEN — das Signature-Element
+   Der Grund ist keine Dekoration, sondern die Tageszeit. Das
+   Attribut setzt src/lib/mesh.ts aus sun.sun (HA). Nur Mesh-,
+   Glas- und Textfarben wechseln; das Layout bleibt identisch.
+   ============================================================ */
+
+/* Registrierte Farb-Properties, damit der Phasenwechsel sauber
+   überblendet — ohne @property springen Custom Properties hart. */
+@property --mesh-a { syntax: "<color>"; inherits: true; initial-value: #FFC3A0 }
+@property --mesh-b { syntax: "<color>"; inherits: true; initial-value: #D8BEFF }
+@property --mesh-c { syntax: "<color>"; inherits: true; initial-value: #FFAECB }
+@property --mesh-d { syntax: "<color>"; inherits: true; initial-value: #A6E3CB }
+@property --mesh-base { syntax: "<color>"; inherits: true; initial-value: #F2E9F2 }
+
+:root {
+  /* Glasstufen. Die Platte liegt bewusst deutlich unter den Panels —
+     sonst verschwimmen beide zu einer weißen Fläche und die Schichtung,
+     von der der ganze Look lebt, ist nicht mehr zu sehen. */
+  --glass-1: rgb(255 255 255 / 0.22);
+  --glass-2: rgb(255 255 255 / 0.62);
+  --glass-3: rgb(255 255 255 / 0.80);
+  --glass-4: rgb(255 255 255 / 0.92);
+  --glass-edge-top: rgb(255 255 255 / 0.75);
+  --scrim: rgb(0 0 0 / 0.55);
+
+  transition:
+    --mesh-a 12s linear, --mesh-b 12s linear, --mesh-c 12s linear,
+    --mesh-d 12s linear, --mesh-base 12s linear;
+}
+
+/* Tag ist die Grundstimmung und steht bereits in den @property-
+   Startwerten; die übrigen vier Phasen weichen davon ab. */
+html[data-daylight='daemmerung'] {
+  --mesh-a: #98A8E4;  /* Tiefblau  */
+  --mesh-b: #CBB6E6;  /* Flieder   */
+  --mesh-c: #F5BBB2;  /* Rosé am Horizont */
+  --mesh-d: #AFC8E0;
+  --mesh-base: #DFDCEC;
+}
+
+html[data-daylight='morgen'] {
+  --mesh-a: #FFC69A;  /* Pfirsich */
+  --mesh-b: #FFE9BE;  /* Creme    */
+  --mesh-c: #FFCDB2;
+  --mesh-d: #B4E8CD;  /* helles Mint */
+  --mesh-base: #F9EFE2;
+}
+
+html[data-daylight='abend'] {
+  --mesh-a: #FFBC72;  /* Bernstein */
+  --mesh-b: #E29CBC;  /* Malve     */
+  --mesh-c: #FF9670;  /* Koralle   */
+  --mesh-d: #CBA6DC;
+  --mesh-base: #F1DDDB;
+}
+
+html[data-daylight='nacht'] {
+  /* Bewusst tief angesetzt: bei nur 9 % Glasdeckkraft bestimmt der
+     Grund die Lesbarkeit fast allein. Hellere Töne haben hier den
+     Kontrast heller Schrift unter AA gedrückt. */
+  --mesh-a: #221C46;  /* Indigo   */
+  --mesh-b: #33234E;  /* Violett  */
+  --mesh-c: #162C35;  /* Petrol   */
+  --mesh-d: #1D183A;
+  --mesh-base: #0F0C18;
+
+  /* Glas wird dunkel getönt statt hell — sonst blendet das
+     Küchendisplay nachts. Alle Widgets erben das über die Tokens. */
+  --glass-1: rgb(255 255 255 / 0.05);
+  --glass-2: rgb(255 255 255 / 0.09);
+  --glass-3: rgb(255 255 255 / 0.15);
+  --glass-4: rgb(26 20 40 / 0.88);
+  --glass-edge-top: rgb(255 255 255 / 0.16);
+  --scrim: rgb(0 0 0 / 0.65);
+
+  --color-ink: #F4EFFA;
+  --color-text-primary: #E7E0F0;
+  --color-text-secondary: #C6BDD4;
+  --color-text-muted: #BDB3CC;
+  --color-border: rgb(255 255 255 / 0.14);
+  --color-surface-hover: rgb(255 255 255 / 0.10);
+
+  --color-accent: #FF8E73;
+  --color-accent-hover: #FFA48D;
+  --color-on-fill: #23151A;
+  --color-success: #5FD3AA;
+  --color-warning: #F0B357;
+  --color-danger: #FF8FC8;
+  --color-photo-text: #E39BB8;
+}
+
 body {
-  @apply bg-surface text-text-primary antialiased;
+  @apply text-text-primary antialiased;
   font-family: var(--font-sans);
+  background: transparent;
+}
+
+/* Der Mesh-Grund: genau EIN fixes Element hinter der ganzen App.
+   Kein per-Panel-Gradient — das wäre auf schwacher GPU teuer. */
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 12% 18%, var(--mesh-a) 0%, transparent 62%),
+    radial-gradient(55% 55% at 88% 12%, var(--mesh-b) 0%, transparent 60%),
+    radial-gradient(65% 60% at 78% 88%, var(--mesh-c) 0%, transparent 62%),
+    radial-gradient(60% 55% at 18% 92%, var(--mesh-d) 0%, transparent 60%),
+    var(--mesh-base);
+}
+
+/* Als @utility statt @layer components deklariert — nur so lassen sich
+   Varianten wie lg: davorsetzen (die Platte gibt es erst ab Desktop). */
+
+/* Standard-Panel — nur Kante und Schatten. Fläche, Blur und Radius
+   kommen immer aus den Modifiern unten, damit sich hier nichts
+   gegenseitig überschreibt und die Reihenfolge egal bleibt.
+   Regel: kein backdrop-filter im backdrop-filter — Kacheln INNERHALB
+   eines Panels nutzen glass-inset ohne eigenen Blur. */
+@utility glass-panel {
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-glass);
+}
+
+/* Die große App-Platte, auf der ab lg: alles sitzt */
+@utility glass-plate {
+  background: var(--glass-1);
+  backdrop-filter: blur(var(--glass-blur-lg)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(150%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-plate);
+  box-shadow: var(--shadow-plate);
+}
+
+/* Flächen innerhalb eines Panels: getönt, ohne eigenen Blur */
+@utility glass-inset {
+  background: var(--glass-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-tile);
+}
+
+/* Modifier für GlassPanel. Bewusst Klassen statt Inline-Styles,
+   sonst könnte der perf-lite-Schalter den Blur nicht mehr kippen. */
+@utility glass-l1 { background: var(--glass-1) }
+@utility glass-l2 { background: var(--glass-2) }
+@utility glass-l3 { background: var(--glass-3) }
+@utility glass-l4 { background: var(--glass-4) }
+
+@utility glass-blur-none { backdrop-filter: none; -webkit-backdrop-filter: none }
+@utility glass-blur-sm {
+  backdrop-filter: blur(var(--glass-blur-sm)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(140%);
+}
+@utility glass-blur-md {
+  backdrop-filter: blur(var(--glass-blur-md)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(140%);
+}
+@utility glass-blur-lg {
+  backdrop-filter: blur(var(--glass-blur-lg)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(150%);
+}
+
+@utility r-tile { border-radius: var(--r-tile) }
+@utility r-panel { border-radius: var(--r-panel) }
+@utility r-plate { border-radius: var(--r-plate) }
+
+/* Die kleine Kugel neben der Wortmarke — dieselben Farben wie der
+   Grund, damit sie mit der Tageszeit mitwandert. */
+@utility daylight-dot {
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.85) 0%, transparent 42%),
+    radial-gradient(circle at 70% 75%, var(--mesh-c) 0%, transparent 60%),
+    linear-gradient(140deg, var(--mesh-a), var(--mesh-b));
+  box-shadow: var(--shadow-pill);
+}
+
+/* Foto-Block: Glas mit einem Hauch Altrosa */
+@utility glass-photo {
+  background:
+    linear-gradient(rgb(255 205 226 / 0.34), rgb(255 205 226 / 0.10)),
+    var(--glass-2);
+}
+
+/* Kachel-Verlauf folgt der Tagphase mit demselben Crossfade */
+@utility mesh-tile {
+  transition: background-image 12s linear, background-color 12s linear;
+}
+
+/* Griffschatten der Slider. Steht bewusst EINMAL global hier und
+   liest den Wert je Instanz aus --thumb-shadow (gesetzt in
+   Slider.tsx) — vorher schrieb jede Instanz ein eigenes <style>
+   mit globalem Selektor und überschrieb damit alle anderen. */
+input[type='range']::-webkit-slider-thumb {
+  box-shadow: var(--thumb-shadow, 0 2px 6px rgb(84 60 118 / 0.25));
+}
+input[type='range']::-moz-range-thumb {
+  box-shadow: var(--thumb-shadow, 0 2px 6px rgb(84 60 118 / 0.25));
+}
+
+/* Kill-Switch für schwache Hardware (Küchendisplay): ?lite=1 oder
+   localStorage 'perf-lite'. Der Look bleibt erkennbar, der Blur —
+   der teuerste Teil pro Frame — fällt weg. */
+html.perf-lite *,
+html.perf-lite *::before,
+html.perf-lite *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.perf-lite {
+  --glass-1: rgb(255 255 255 / 0.68);
+  --glass-2: rgb(255 255 255 / 0.82);
+  --glass-3: rgb(255 255 255 / 0.90);
+}
+html.perf-lite[data-daylight='nacht'] {
+  --glass-1: rgb(32 25 48 / 0.72);
+  --glass-2: rgb(32 25 48 / 0.82);
+  --glass-3: rgb(46 37 66 / 0.88);
 }
 
 /* Im base-Layer, damit Utilities wie border-l-accent gewinnen
@@ -107,10 +348,10 @@ body {
 /* Pulsing glow for active elements */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 15px rgb(216 90 48 / 0.3);
+    box-shadow: 0 0 15px rgb(from var(--color-accent) r g b / 0.3);
   }
   50% {
-    box-shadow: 0 0 25px rgb(216 90 48 / 0.5);
+    box-shadow: 0 0 25px rgb(from var(--color-accent) r g b / 0.5);
   }
 }
 
@@ -175,13 +416,13 @@ body {
 /* Success celebration burst */
 @keyframes glow-burst {
   0% {
-    box-shadow: 0 0 0 0 rgb(76 122 92 / 0.7);
+    box-shadow: 0 0 0 0 rgb(from var(--color-success) r g b / 0.7);
   }
   50% {
-    box-shadow: 0 0 20px 10px rgb(76 122 92 / 0.4);
+    box-shadow: 0 0 20px 10px rgb(from var(--color-success) r g b / 0.4);
   }
   100% {
-    box-shadow: 0 0 0 0 rgb(76 122 92 / 0);
+    box-shadow: 0 0 0 0 rgb(from var(--color-success) r g b / 0);
   }
 }
 
@@ -335,89 +576,6 @@ body {
   animation: count-pulse 0.3s var(--ease-bounce);
 }
 
-/* Glass morphism */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.glass-heavy {
-  background: var(--glass-bg-heavy);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-/* Text glow effects */
-.text-glow-accent {
-  text-shadow: 0 0 10px rgb(216 90 48 / 0.5);
-}
-
-.text-glow-warning {
-  text-shadow: 0 0 10px rgb(168 117 43 / 0.5);
-}
-
-.text-glow-success {
-  text-shadow: 0 0 10px rgb(76 122 92 / 0.5);
-}
-
-.text-glow-cyan {
-  text-shadow: 0 0 10px rgb(216 90 48 / 0.5);
-}
-
-/* Border glow states */
-.border-glow-on {
-  box-shadow:
-    0 0 15px rgb(168 117 43 / 0.3),
-    inset 0 0 15px rgb(168 117 43 / 0.05);
-}
-
-.border-glow-accent {
-  box-shadow:
-    0 0 15px rgb(216 90 48 / 0.3),
-    inset 0 0 15px rgb(216 90 48 / 0.05);
-}
-
-.border-glow-success {
-  box-shadow:
-    0 0 15px rgb(76 122 92 / 0.3),
-    inset 0 0 15px rgb(76 122 92 / 0.05);
-}
-
-.border-glow-cyan {
-  box-shadow:
-    0 0 15px rgb(216 90 48 / 0.3),
-    inset 0 0 15px rgb(216 90 48 / 0.05);
-}
-
-/* Gradient border */
-.gradient-border {
-  position: relative;
-}
-
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgb(216 90 48 / 0.5),
-    rgb(216 90 48 / 0.3),
-    rgb(153 53 86 / 0.3)
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
 /* Ripple container */
 .ripple-container {
   position: relative;
@@ -430,23 +588,6 @@ body {
   background: oklch(1 0 0 / 0.3);
   animation: ripple 0.6s linear;
   pointer-events: none;
-}
-
-/* Icon glow when active */
-.icon-glow-warning {
-  filter: drop-shadow(0 0 8px rgb(168 117 43 / 0.6));
-}
-
-.icon-glow-accent {
-  filter: drop-shadow(0 0 8px rgb(216 90 48 / 0.6));
-}
-
-.icon-glow-success {
-  filter: drop-shadow(0 0 8px rgb(76 122 92 / 0.6));
-}
-
-.icon-glow-cyan {
-  filter: drop-shadow(0 0 8px rgb(216 90 48 / 0.6));
 }
 
 /* ========================================
@@ -554,15 +695,15 @@ body {
 
 /* Consumable progress colors */
 .consumable-healthy {
-  background: rgb(76 122 92);
+  background: rgb(from var(--color-success) r g b);
 }
 
 .consumable-warning {
-  background: rgb(168 117 43);
+  background: rgb(from var(--color-warning) r g b);
 }
 
 .consumable-danger {
-  background: rgb(178 59 46);
+  background: rgb(from var(--color-danger) r g b);
 }
 
 /* ========================================
@@ -572,8 +713,8 @@ body {
 .print-progress-bar {
   background: linear-gradient(
     90deg,
-    rgb(216 90 48) 0%,
-    rgb(216 90 48) 100%
+    rgb(from var(--color-accent) r g b) 0%,
+    rgb(from var(--color-accent) r g b) 100%
   );
 }
 
@@ -802,6 +943,11 @@ body {
    ======================================== */
 
 @media (prefers-reduced-motion: reduce) {
+  /* Der Tagphasen-Wechsel springt dann hart statt zu überblenden */
+  :root {
+    transition: none !important;
+  }
+
   *,
   *::before,
   *::after {

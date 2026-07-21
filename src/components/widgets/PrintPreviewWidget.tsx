@@ -132,7 +132,7 @@ export function PrintPreviewWidget({
                       className="absolute bottom-2 left-[10%] w-[80%] bg-accent/30 rounded-sm transition-all duration-1000"
                       style={{
                         height: `${(displayProgress / 100) * 60}%`,
-                        boxShadow: '0 0 20px rgb(216 90 48 / 0.3)',
+                        boxShadow: '0 0 20px rgb(from var(--color-accent) r g b / 0.3)',
                       }}
                     >
                       <div className="absolute inset-0 animate-shimmer rounded-sm" />
@@ -175,8 +175,8 @@ export function PrintPreviewWidget({
             {/* Speed indicator */}
             {printSpeed !== null && (
               <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-black/50 text-xs">
-                <Gauge className="w-3 h-3 text-neon-cyan" />
-                <span className="text-neon-cyan font-medium">{printSpeed}%</span>
+                <Gauge className="w-3 h-3 text-text-secondary" />
+                <span className="text-text-secondary font-medium">{printSpeed}%</span>
               </div>
             )}
 
@@ -195,7 +195,7 @@ export function PrintPreviewWidget({
                   {currentLayer ?? '--'}/{totalLayers ?? '--'}
                 </span>
               </span>
-              <span className="flex items-center gap-1 text-neon-cyan">
+              <span className="flex items-center gap-1 text-text-secondary">
                 <Clock className="w-3.5 h-3.5" />
                 <span className="font-medium">{formatTime(remainingTime)}</span>
               </span>
@@ -231,8 +231,8 @@ export function PrintPreviewWidget({
                 className={clsx(
                   'flex-1 py-2 px-3 rounded-md text-xs font-medium transition-all',
                   speedMode === mode.id
-                    ? 'bg-accent text-white shadow-glow-accent'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-elevated'
+                    ? 'bg-accent text-on-fill shadow-float'
+                    : 'text-text-secondary hover:text-ink hover:bg-white/40'
                 )}
               >
                 <span className="mr-1">{mode.icon}</span>
@@ -256,7 +256,7 @@ export function PrintPreviewWidget({
               )}
             >
               {chamberLightOn ? (
-                <Lightbulb className="w-4 h-4 mr-1.5 icon-glow-warning" />
+                <Lightbulb className="w-4 h-4 mr-1.5" />
               ) : (
                 <LightbulbOff className="w-4 h-4 mr-1.5" />
               )}

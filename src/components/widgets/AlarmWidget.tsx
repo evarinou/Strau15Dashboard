@@ -26,7 +26,7 @@ const MODE_CONFIG: Record<AlarmMode, { icon: typeof Calendar; label: string; col
   'Nur Werktage': {
     icon: Briefcase,
     label: 'Werktage',
-    color: 'text-cyan-400',
+    color: 'text-accent',
   },
   'Nur Wochenende': {
     icon: Sun,
@@ -117,7 +117,7 @@ export function AlarmWidget({
               isActive ? 'bg-accent/20' : 'bg-surface-hover'
             )}
             style={{
-              boxShadow: isActive ? '0 0 12px rgb(216 90 48 / 0.3)' : undefined,
+              boxShadow: isActive ? '0 0 12px rgb(from var(--color-accent) r g b / 0.3)' : undefined,
             }}
           >
             {isActive ? (
@@ -155,7 +155,7 @@ export function AlarmWidget({
           isActive && 'border-accent/30'
         )}
         style={{
-          boxShadow: isActive ? '0 0 20px rgb(216 90 48 / 0.1)' : undefined,
+          boxShadow: isActive ? '0 0 20px rgb(from var(--color-accent) r g b / 0.1)' : undefined,
         }}
       >
         {/* Background glow when active */}
@@ -163,13 +163,13 @@ export function AlarmWidget({
           <div
             className="absolute inset-0 opacity-30 pointer-events-none"
             style={{
-              background: 'radial-gradient(circle at 30% 30%, rgb(216 90 48 / 0.15), transparent 70%)',
+              background: 'radial-gradient(circle at 30% 30%, rgb(from var(--color-accent) r g b / 0.15), transparent 70%)',
             }}
           />
         )}
 
         <CardHeader className="relative z-10">
-          <CardTitle className="flex items-center gap-2" glow={isActive}>
+          <CardTitle className="flex items-center gap-2">
             <AlarmClock className={clsx('w-4 h-4', isActive && 'text-accent')} />
             Wecker
           </CardTitle>
@@ -189,7 +189,7 @@ export function AlarmWidget({
                 isActive ? 'bg-accent/20' : 'bg-surface-hover/50'
               )}
               style={{
-                boxShadow: isActive ? '0 0 15px rgb(216 90 48 / 0.3)' : undefined,
+                boxShadow: isActive ? '0 0 15px rgb(from var(--color-accent) r g b / 0.3)' : undefined,
               }}
             >
               {isActive ? (
@@ -297,8 +297,8 @@ export function AlarmWidget({
   return (
     <Card entrance={entrance} entranceDelay={entranceDelay}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2" glow={isActive}>
-          <AlarmClock className={clsx('w-4 h-4', isActive && 'text-accent icon-glow-accent')} />
+        <CardTitle className="flex items-center gap-2">
+          <AlarmClock className={clsx('w-4 h-4', isActive && 'text-accent')} />
           Wecker
         </CardTitle>
         <Toggle
@@ -316,11 +316,11 @@ export function AlarmWidget({
               isActive ? 'bg-accent/20' : 'bg-surface-hover'
             )}
             style={{
-              boxShadow: isActive ? '0 0 30px rgb(216 90 48 / 0.3)' : undefined,
+              boxShadow: isActive ? '0 0 30px rgb(from var(--color-accent) r g b / 0.3)' : undefined,
             }}
           >
             {isActive ? (
-              <Bell className="w-10 h-10 text-accent animate-float icon-glow-accent" />
+              <Bell className="w-10 h-10 text-accent animate-float" />
             ) : (
               <BellOff className="w-10 h-10 text-text-secondary" />
             )}
@@ -329,7 +329,7 @@ export function AlarmWidget({
           <p
             className={clsx(
               'text-5xl font-bold font-mono tabular-nums transition-all duration-300',
-              isActive ? 'text-text-primary text-glow-accent' : 'text-text-secondary'
+              isActive ? 'text-text-primary' : 'text-text-secondary'
             )}
           >
             {alarm.nextAlarmTime || '--:--'}
@@ -358,7 +358,7 @@ export function AlarmWidget({
                       : 'bg-surface-hover text-text-secondary hover:bg-surface-hover/80 border border-transparent'
                   )}
                   style={{
-                    boxShadow: isSelected ? '0 0 10px rgb(216 90 48 / 0.2)' : undefined,
+                    boxShadow: isSelected ? '0 0 10px rgb(from var(--color-accent) r g b / 0.2)' : undefined,
                   }}
                 >
                   <Icon className="w-4 h-4" />

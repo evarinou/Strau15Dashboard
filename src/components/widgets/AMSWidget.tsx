@@ -186,9 +186,9 @@ function AMSStats({
     <div className="grid grid-cols-3 gap-2 mt-3">
       {/* Temperature */}
       <div className="flex flex-col items-center p-2 rounded-lg bg-surface-elevated/30">
-        <Thermometer className="w-4 h-4 text-neon-cyan mb-1" />
+        <Thermometer className="w-4 h-4 text-text-secondary mb-1" />
         <span className="text-xs text-text-secondary">Temperatur</span>
-        <span className="text-sm font-bold text-neon-cyan">
+        <span className="text-sm font-bold text-text-secondary">
           {unit.temperature !== null ? `${unit.temperature}°C` : '--'}
         </span>
         {temperatureHistory && temperatureHistory.length > 1 && (
@@ -196,7 +196,7 @@ function AMSStats({
             data={temperatureHistory}
             width={60}
             height={24}
-            color="rgb(216 90 48)"
+            color="rgb(from var(--color-accent) r g b)"
             className="mt-1"
           />
         )}
@@ -214,7 +214,7 @@ function AMSStats({
             data={humidityHistory}
             width={60}
             height={24}
-            color="rgb(216 90 48)"
+            color="rgb(from var(--color-accent) r g b)"
             className="mt-1"
           />
         )}

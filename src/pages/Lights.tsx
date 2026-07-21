@@ -41,8 +41,12 @@ export function Lights() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Lichter</h1>
-          <p className="text-text-secondary">{totalActive} von {totalCount} eingeschaltet</p>
+          <h1 className="font-display text-4xl lg:text-5xl font-extrabold tracking-[-0.03em] text-ink">
+            Lichter
+          </h1>
+          <p className="text-text-secondary mt-1">
+            {totalActive} von {totalCount} eingeschaltet
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={turnAllOn}>

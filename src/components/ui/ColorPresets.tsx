@@ -79,14 +79,16 @@ export function ColorPresets({
             className={clsx(
               'flex-shrink-0 w-8 h-8 rounded-full transition-all duration-200',
               'hover:scale-110 active:scale-95',
-              'focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface',
-              isSelected && 'ring-2 ring-white ring-offset-2 ring-offset-surface scale-110'
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+              // Ring in Tinte statt in Weiß: das weiße Feld „Kaltweiß"
+              // hatte vorher einen Auswahlring, den man nicht sah.
+              isSelected && 'ring-2 ring-ink ring-offset-2 ring-offset-white/60 scale-110'
             )}
             style={{
               backgroundColor: rgbString,
               boxShadow: isSelected
-                ? `0 0 12px ${rgbString}, 0 0 24px ${rgbString}`
-                : `0 2px 4px oklch(0 0 0 / 0.3)`,
+                ? `0 0 14px ${rgbString}`
+                : 'var(--shadow-float)',
             }}
             title={preset.name}
             aria-label={preset.name}

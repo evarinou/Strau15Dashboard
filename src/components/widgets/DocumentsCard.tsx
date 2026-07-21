@@ -38,7 +38,7 @@ export function DocumentsCard() {
                   src={`/api/documents/${doc.id}/thumb`}
                   alt=""
                   loading="lazy"
-                  className="w-9 h-11 object-cover rounded border border-border flex-shrink-0 bg-surface-hover"
+                  className="w-9 h-11 object-cover rounded-lg border border-border flex-shrink-0 glass-inset"
                   onError={(e) => {
                     // Thumbnail nicht verfügbar → generisches Icon zeigen
                     e.currentTarget.style.display = 'none'
@@ -47,7 +47,7 @@ export function DocumentsCard() {
                 />
                 <FileText className="w-5 h-5 text-text-secondary hidden flex-shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate group-hover:text-accent-soft transition-colors">
+                  <p className="text-sm font-medium truncate group-hover:text-accent transition-colors">
                     {doc.title}
                   </p>
                   <p className="text-xs text-text-secondary">

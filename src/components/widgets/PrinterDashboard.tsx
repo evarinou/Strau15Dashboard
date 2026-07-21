@@ -120,18 +120,18 @@ export function PrinterDashboard({
                   className={clsx(
                     'flex flex-col items-center gap-2 p-4 rounded-xl transition-all duration-300',
                     printer.chamberLightOn
-                      ? 'bg-warning/20 border border-warning/30 border-glow-on'
+                      ? 'bg-warning/20 border border-warning/30'
                       : 'bg-surface-hover hover:bg-surface-hover/80'
                   )}
                 >
                   {printer.chamberLightOn ? (
-                    <Lightbulb className="w-6 h-6 text-warning icon-glow-warning" />
+                    <Lightbulb className="w-6 h-6 text-warning" />
                   ) : (
                     <LightbulbOff className="w-6 h-6 text-text-secondary" />
                   )}
                   <span className={clsx(
                     'text-sm font-medium',
-                    printer.chamberLightOn && 'text-warning text-glow-warning'
+                    printer.chamberLightOn && 'text-warning'
                   )}>
                     Kammer
                   </span>
@@ -145,18 +145,18 @@ export function PrinterDashboard({
                   className={clsx(
                     'flex flex-col items-center gap-2 p-4 rounded-xl transition-all duration-300',
                     printer.roomLightOn
-                      ? 'bg-warning/20 border border-warning/30 border-glow-on'
+                      ? 'bg-warning/20 border border-warning/30'
                       : 'bg-surface-hover hover:bg-surface-hover/80'
                   )}
                 >
                   {printer.roomLightOn ? (
-                    <Lightbulb className="w-6 h-6 text-warning icon-glow-warning" />
+                    <Lightbulb className="w-6 h-6 text-warning" />
                   ) : (
                     <LightbulbOff className="w-6 h-6 text-text-secondary" />
                   )}
                   <span className={clsx(
                     'text-sm font-medium',
-                    printer.roomLightOn && 'text-warning text-glow-warning'
+                    printer.roomLightOn && 'text-warning'
                   )}>
                     Raum
                   </span>

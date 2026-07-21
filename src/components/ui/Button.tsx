@@ -8,7 +8,8 @@ interface RippleEffect {
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'glow'
+  /** `secondary` ist die Glas-Variante — sie sitzt auf dem Panel, nicht darauf. */
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   enableRipple?: boolean
 }
@@ -54,30 +55,23 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={clsx(
-          'relative inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-          'active:scale-[0.97]',
-          'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100',
-          'overflow-hidden',
+          'relative inline-flex items-center justify-center rounded-full font-semibold',
+          'transition-all duration-200 overflow-hidden active:scale-[0.97]',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+          // Auf Glas ist eine ausgegraute Fläche kaum noch zu sehen —
+          // deshalb gedämpfte Schrift statt globaler Transparenz.
+          'disabled:cursor-not-allowed disabled:text-text-muted disabled:active:scale-100',
           {
-            // Primary with hover glow
-            'bg-accent text-white hover:bg-accent-hover hover:shadow-glow-accent':
+            'bg-accent text-on-fill hover:bg-accent-hover shadow-float disabled:bg-white/40':
               variant === 'primary',
-            // Secondary
-            'bg-surface-elevated text-text-primary hover:bg-surface-hover border border-border/50':
-              variant === 'secondary',
-            // Ghost
-            'bg-transparent text-text-primary hover:bg-surface-hover':
+            'glass-inset text-ink hover:bg-white/90 shadow-pill': variant === 'secondary',
+            'bg-transparent text-text-secondary hover:bg-white/40 hover:text-ink':
               variant === 'ghost',
-            // Danger
-            'bg-danger text-white hover:opacity-90': variant === 'danger',
-            // Glow variant - neon border with animated glow
-            'bg-transparent text-accent border border-accent/50 hover:border-accent hover:shadow-glow-accent animate-glow-pulse':
-              variant === 'glow',
-            // Sizes
-            'h-8 px-3 text-sm': size === 'sm',
-            'h-10 px-4 text-sm': size === 'md',
-            'h-12 px-6 text-base': size === 'lg',
+            'bg-danger text-on-fill hover:opacity-90 shadow-float': variant === 'danger',
+
+            'h-8 px-3.5 text-sm': size === 'sm',
+            'h-10 px-5 text-sm': size === 'md',
+            'h-12 px-7 text-base': size === 'lg',
           },
           className
         )}
@@ -85,7 +79,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         onClick={handleClick}
         {...props}
       >
-        {/* Ripple effects */}
         {ripples.map((ripple) => (
           <span
             key={ripple.id}

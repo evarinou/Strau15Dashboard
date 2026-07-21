@@ -231,36 +231,63 @@ strau15machine (Port 3050), Deploy via GitHub Actions + Watchtower bei Push auf 
 
 ## Design System
 
-Design-Sprache „Warm & wohnlich" — editorial, passend zum Haus von 1842.
-**Typo-Regel (Kern des Looks):** Serif (Fraunces Variable) NUR für Begrüßung und
-KI-Briefing; alles Funktionale (Tasks, Zahlen, Labels) in Source Sans 3.
-Beide Fonts self-hosted via @fontsource (Import in `src/index.css`).
+Design-Sprache „Tageslicht" — verspieltes Pastell-Glassmorphism. Der Grund ist
+ein weiches Verlaufsmesh, darauf sitzen frosted-glass Panels; ab `lg:` liegt die
+ganze App als eine Glasplatte (`.glass-plate`) auf dem Mesh.
+
+**Signature — der Grund folgt der Tageszeit:** `.mesh-bg` (ein einziges fixes
+Element hinter allem) wechselt über `html[data-daylight]` zwischen fünf
+Stimmungen (Dämmerung/Morgen/Tag/Abend/Nacht), abgeleitet aus dem Sonnenstand
+(`sun.sun`, siehe `src/lib/daylight.ts`). Nachts wird das Glas dunkel getönt,
+damit das Küchendisplay nicht blendet. Alle Widget-Farben erben das über Tokens.
+Override zum Prüfen: `?daylight=nacht`. Zweiter Zug: Kachelfarben sind
+deterministisch aus einem Seed (`ha_area_id`, Skriptname), `src/lib/mesh.ts` —
+jeder Raum hat für immer dieselbe Farbe.
+
+**Typo-Regel (Kern des Looks):** Display-Schrift **Bricolage Grotesque Variable**
+NUR für Überschriften und große Zahlen (`font-display`); alles Funktionale in
+**Plus Jakarta Sans Variable** (`font-sans`, Default). Beide self-hosted via
+@fontsource (Import in `src/index.css`). (`font-serif` ist als Alias auf die
+Display-Schrift remappt, damit Alt-Aufrufer nicht brechen.)
 
 ### Farben (Tailwind @theme in src/index.css)
+Alle Farbwerte sind für WCAG AA über allen fünf Tagphasen und Mesh-Regionen am
+gerenderten Pixel geprüft. Werte gelten für die Tag-Phase; Nacht überschreibt
+Text-, Akzent- und Glasfarben im `html[data-daylight='nacht']`-Block.
 ```css
---color-surface: #F1EFE8;           /* Grundfläche Sandbeige */
---color-surface-elevated: #FAF7F0;  /* Cards cremeweiß */
---color-border: #D3D1C7;
---color-text-primary: #2C2C2A;
---color-text-secondary: #5F5E5A;    /* warmes Grau */
---color-accent: #D85A30;            /* Terrakotta */
---color-accent-ink: #4A1B0C;        /* Terrakotta-Text stark */
---color-accent-text: #712B13;
---color-accent-soft: #993C1D;
---color-photo-surface: #FBEAF0;     /* Foto-Block Altrosa */
---color-photo-ink: #4B1528;
---color-photo-text: #993556;
---color-success: #4C7A5C;  --color-warning: #A8752B;  --color-danger: #B23B2E;
+--color-ink: #241C2E;            /* Headlines, große Zahlen */
+--color-text-primary: #2E2739;   /* Fließtext */
+--color-text-secondary: #59506A; /* Labels */
+--color-text-muted: #5F566F;     /* Meta, Zeitstempel */
+--color-accent: #AE3018;         /* Koralle (trägt die Wärme des alten Terrakotta) */
+--color-on-fill: #FFFFFF;        /* Schrift auf gesättigten Flächen (nachts dunkel) */
+--color-success: #0F6247;  --color-warning: #7E5200;  --color-danger: #9C1866; /* Himbeere */
+/* *-fill-Varianten (z.B. --color-success-fill) für Flächen/Punkte, nie für Text */
+
+/* Glas — vier Deckkraftstufen; Platte (glass-1) bewusst weit unter den Panels */
+--glass-1..4: rgb(255 255 255 / 0.22 … 0.92);
+--r-tile/-panel/-plate: 20/24/32px;   --glass-blur-sm/-md/-lg: 10/20/32px;
+--shadow-glass / -plate / -pill / -float(-lg);   /* mehrschichtig: outer + inset highlight */
 ```
 
-**Formsprache:** Cards Radius 12–16px. Terrakotta-Akzent als linke Kante
-(`Card tone="accent"`: border-left 4px, links eckig, rechts 14px Radius);
-Foto-Block als `Card tone="photo"` in Altrosa.
+**Formsprache:** Frosted-Glass-Panels mit großen Radien und weichem Schatten plus
+heller Innenkante. **Harte Regel:** kein `backdrop-filter` im `backdrop-filter` —
+Flächen INNERHALB eines Panels nutzen `.glass-inset` (getönt, ohne eigenen Blur).
+Kill-Switch für schwache Hardware: `?lite=1` oder `localStorage 'perf-lite'`
+schaltet alle Blurs ab und macht das Glas deckend (`src/lib/daylight.ts`).
+
+### Primitives (`src/components/ui/`)
+- **GlassPanel** — `level` 1–4, `radius`, `blur`, `padding`, `interactive`. Basis aller Flächen.
+- **MeshTile** — große Verlaufskachel mit Label + rundem Knopf; `seed`, `image`, `icon`, `aspect`.
+- **NavPill** / **IconButton** — Pillen-Navigation und runde Icon-Knöpfe.
+- **Card** — dünner Adapter auf GlassPanel (behält Alt-API: `variant`, `entrance`, `tone`, `glowOnActive`).
+- **mesh.ts** `meshStyle(seed, phase)` · **daylight.ts** `useDaylight()` / `applyDisplayPreferences()`.
+- Dev-Musterbogen mit allen Primitives, Statusfarben und Tagphasen: Route `/styleguide`.
 
 ### Komponenten
 - **Touch Targets:** Min. 44px für touch-friendly Buttons
-- **Animationen:** 150-300ms Transitions
-- **Responsive:** Mobile-first, Desktop ab `lg:` (1024px)
+- **Animationen:** 150-300ms Transitions; Tagphasen-Crossfade 12s; `prefers-reduced-motion` respektiert
+- **Responsive:** Mobile-first, Desktop ab `lg:` (1024px); mobil kein Plattenrand, Panels sind das Glas
 
 ## WebSocket Integration
 

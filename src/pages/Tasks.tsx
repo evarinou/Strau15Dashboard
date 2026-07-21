@@ -19,7 +19,7 @@ function ProgressBar({ value, max, label }: { value: number; max: number; label:
           {value}/{max}
         </span>
       </div>
-      <div className="h-2 bg-surface-hover rounded-full overflow-hidden">
+      <div className="h-2 bg-white/40 rounded-full overflow-hidden">
         <div
           className="h-full bg-accent rounded-full transition-all duration-500"
           style={{ width: `${percent}%` }}
@@ -72,15 +72,18 @@ function CreateTaskModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-surface/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Dialog */}
-      <div className="relative z-10 w-full max-w-md p-6 rounded-2xl bg-surface-elevated border border-border/50 shadow-float-lg">
+      <div className="glass-panel glass-l4 glass-blur-lg relative z-10 w-full max-w-md p-6 rounded-3xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold">Neue Aufgabe</h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-surface-hover transition-colors">
+          <h2 className="font-display text-xl font-extrabold text-ink">Neue Aufgabe</h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-full hover:bg-white/40 transition-colors"
+          >
             <X className="w-5 h-5 text-text-secondary" />
           </button>
         </div>
@@ -96,7 +99,7 @@ function CreateTaskModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="z.B. Küche wischen"
-              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-accent/50 transition-colors"
+              className="glass-inset w-full px-3 py-2.5 rounded-xl text-text-primary placeholder:text-text-muted focus:outline-2 focus:outline-accent transition-colors"
               autoFocus
             />
           </div>
@@ -109,7 +112,7 @@ function CreateTaskModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             <select
               value={roomId}
               onChange={(e) => setRoomId(e.target.value ? Number(e.target.value) : '')}
-              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary focus:outline-none focus:border-accent/50 transition-colors"
+              className="glass-inset w-full px-3 py-2.5 rounded-xl text-text-primary focus:outline-2 focus:outline-accent transition-colors"
             >
               <option value="">Raum wählen...</option>
               {rooms
@@ -132,7 +135,7 @@ function CreateTaskModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
               value={basePoints}
               onChange={(e) => setBasePoints(Number(e.target.value))}
               min={1}
-              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary focus:outline-none focus:border-accent/50 transition-colors"
+              className="glass-inset w-full px-3 py-2.5 rounded-xl text-text-primary focus:outline-2 focus:outline-accent transition-colors"
             />
           </div>
 
@@ -147,7 +150,7 @@ function CreateTaskModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
               onChange={(e) => setEstimatedMinutes(e.target.value ? Number(e.target.value) : '')}
               min={1}
               placeholder="Optional"
-              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-accent/50 transition-colors"
+              className="glass-inset w-full px-3 py-2.5 rounded-xl text-text-primary placeholder:text-text-muted focus:outline-2 focus:outline-accent transition-colors"
             />
           </div>
 
@@ -159,7 +162,7 @@ function CreateTaskModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             <select
               value={recurrence}
               onChange={(e) => setRecurrence(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border/30 text-text-primary focus:outline-none focus:border-accent/50 transition-colors"
+              className="glass-inset w-full px-3 py-2.5 rounded-xl text-text-primary focus:outline-2 focus:outline-accent transition-colors"
             >
               <option value="once">Einmalig</option>
               <option value="daily">Täglich</option>
@@ -202,12 +205,14 @@ export function Tasks() {
     <div className="space-y-6">
       {celebration && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
           onClick={() => setCelebration(null)}
         >
-          <div className="bg-surface-elevated rounded-2xl p-6 max-w-sm mx-4 text-center">
+          <div className="glass-panel glass-l4 glass-blur-lg rounded-3xl p-6 max-w-sm mx-4 text-center">
             <div className="text-5xl mb-4">🎉</div>
-            <h2 className="text-xl font-bold mb-2">+{celebration.bonus_breakdown.total_points} Punkte!</h2>
+            <h2 className="font-display text-xl font-extrabold text-ink mb-2">
+              +{celebration.bonus_breakdown.total_points} Punkte!
+            </h2>
             {celebration.unlocked_achievements.length > 0 && (
               <div className="mt-4">
                 <p className="text-warning">Achievement freigeschaltet!</p>
@@ -223,8 +228,10 @@ export function Tasks() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Aufgaben</h1>
-          <p className="text-text-secondary">
+          <h1 className="font-display text-4xl lg:text-5xl font-extrabold tracking-[-0.03em] text-ink">
+            Aufgaben
+          </h1>
+          <p className="text-text-secondary mt-1">
             {pendingInstances.length} offen, {completedInstances.length} erledigt
           </p>
         </div>
@@ -244,9 +251,9 @@ export function Tasks() {
             </CardHeader>
 
             {isLoading ? (
-              <div className="animate-pulse space-y-3">
+              <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-16 bg-surface-hover rounded-lg" />
+                  <div key={i} className="h-16 bg-white/35 rounded-2xl animate-shimmer" />
                 ))}
               </div>
             ) : pendingInstances.length === 0 ? (

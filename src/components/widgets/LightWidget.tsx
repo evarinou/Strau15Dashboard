@@ -88,7 +88,7 @@ export function LightWidget({
             <div
               className="absolute inset-0 rounded-full animate-breathe-warm"
               style={{
-                background: `radial-gradient(circle, rgb(168 117 43 / ${glowIntensity}) 0%, transparent 70%)`,
+                background: `radial-gradient(circle, rgb(from var(--color-warning) r g b / ${glowIntensity}) 0%, transparent 70%)`,
                 transform: 'scale(1.5)',
               }}
             />
@@ -97,13 +97,11 @@ export function LightWidget({
           <div
             className={clsx(
               'relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300',
-              isOn
-                ? 'bg-warning/20 text-warning'
-                : 'bg-surface-hover text-text-secondary'
+              isOn ? 'bg-warning/20 text-warning' : 'glass-inset text-text-secondary'
             )}
             style={{
               boxShadow: isOn
-                ? `0 0 ${12 + brightnessPercent * 0.1}px rgb(168 117 43 / ${glowIntensity})`
+                ? `0 0 ${12 + brightnessPercent * 0.1}px rgb(from var(--color-warning) r g b / ${glowIntensity})`
                 : 'none',
             }}
           >
@@ -111,7 +109,7 @@ export function LightWidget({
               <Lightbulb
                 className={clsx(
                   'w-5 h-5 transition-all duration-300',
-                  isOn && 'icon-glow-warning'
+                  isOn && ''
                 )}
               />
             ) : (
@@ -125,7 +123,7 @@ export function LightWidget({
           <p
             className={clsx(
               'text-sm font-medium truncate transition-all duration-300',
-              isOn && 'text-glow-warning'
+              isOn && ''
             )}
           >
             {friendlyName || entityId}
@@ -177,10 +175,8 @@ export function LightWidget({
               }}
               className={clsx(
                 'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200',
-                'hover:bg-surface-hover active:scale-95',
-                showAdvancedColor
-                  ? 'bg-accent/20 text-accent'
-                  : 'bg-surface-hover text-text-secondary'
+                'active:scale-95',
+                showAdvancedColor ? 'bg-accent/20 text-accent' : 'glass-inset text-text-secondary'
               )}
               title="Erweiterte Farbauswahl"
               aria-label="Erweiterte Farbauswahl"

@@ -123,10 +123,10 @@ export function PrintDetailsWidget({
 
   const getStatusColor = () => {
     switch (details.statusType) {
-      case 'printing': return 'rgb(216 90 48)'
-      case 'finished': return 'rgb(76 122 92)'
-      case 'error': return 'rgb(178 59 46)'
-      case 'paused': return 'rgb(168 117 43)'
+      case 'printing': return 'rgb(from var(--color-accent) r g b)'
+      case 'finished': return 'rgb(from var(--color-success) r g b)'
+      case 'error': return 'rgb(from var(--color-danger) r g b)'
+      case 'paused': return 'rgb(from var(--color-warning) r g b)'
       default: return undefined
     }
   }
@@ -150,7 +150,7 @@ export function PrintDetailsWidget({
           icon={<Percent className="w-5 h-5" />}
           label="Fortschritt"
           value={details.progress !== null ? `${Math.round(details.progress)}%` : '--'}
-          valueColor={details.statusType === 'printing' ? 'rgb(216 90 48)' : undefined}
+          valueColor={details.statusType === 'printing' ? 'rgb(from var(--color-accent) r g b)' : undefined}
         />
 
         {/* Layer */}
@@ -179,8 +179,8 @@ export function PrintDetailsWidget({
             label="Benachrichtigungen"
             value={details.hmsNotifications}
             valueColor={details.hmsNotifications.toLowerCase().includes('ok')
-              ? 'rgb(76 122 92)'
-              : 'rgb(168 117 43)'
+              ? 'rgb(from var(--color-success) r g b)'
+              : 'rgb(from var(--color-warning) r g b)'
             }
           />
         )}
@@ -205,7 +205,7 @@ export function PrintDetailsWidget({
           icon={<Timer className="w-5 h-5" />}
           label="Verbleibend"
           value={formatDuration(details.remainingTime)}
-          valueColor={details.statusType === 'printing' ? 'rgb(216 90 48)' : undefined}
+          valueColor={details.statusType === 'printing' ? 'rgb(from var(--color-accent) r g b)' : undefined}
         />
 
         {/* Active tray */}

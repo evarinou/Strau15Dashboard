@@ -19,8 +19,8 @@ const WEATHER_CONFIG: Record<
   sunny: {
     icon: Sun,
     color: 'text-yellow-400',
-    glowColor: 'icon-glow-warning',
-    bgGlow: 'rgb(168 117 43 / 0.15)',
+    glowColor: '',
+    bgGlow: 'rgb(from var(--color-warning) r g b / 0.15)',
   },
   'clear-night': {
     icon: Moon,
@@ -43,14 +43,14 @@ const WEATHER_CONFIG: Record<
   rainy: {
     icon: CloudRain,
     color: 'text-cyan-400',
-    glowColor: 'icon-glow-cyan',
+    glowColor: '',
     bgGlow: 'oklch(0.6 0.15 200 / 0.15)',
   },
   pouring: {
     icon: CloudRain,
     color: 'text-blue-400',
-    glowColor: 'icon-glow-accent',
-    bgGlow: 'rgb(216 90 48 / 0.15)',
+    glowColor: '',
+    bgGlow: 'rgb(from var(--color-accent) r g b / 0.15)',
   },
   snowy: {
     icon: CloudSnow,
@@ -67,20 +67,20 @@ const WEATHER_CONFIG: Record<
   hail: {
     icon: CloudSnow,
     color: 'text-cyan-300',
-    glowColor: 'icon-glow-cyan',
+    glowColor: '',
     bgGlow: 'oklch(0.7 0.15 200 / 0.15)',
   },
   lightning: {
     icon: CloudLightning,
     color: 'text-yellow-300',
-    glowColor: 'icon-glow-warning',
-    bgGlow: 'rgb(168 117 43 / 0.2)',
+    glowColor: '',
+    bgGlow: 'rgb(from var(--color-warning) r g b / 0.2)',
   },
   'lightning-rainy': {
     icon: CloudLightning,
     color: 'text-yellow-400',
-    glowColor: 'icon-glow-warning',
-    bgGlow: 'rgb(168 117 43 / 0.2)',
+    glowColor: '',
+    bgGlow: 'rgb(from var(--color-warning) r g b / 0.2)',
   },
   fog: {
     icon: CloudFog,
@@ -319,7 +319,7 @@ export function WeatherWidget({
       {showAnimations && <WeatherEffect condition={weather.condition} />}
 
       <CardHeader className="relative z-10">
-        <CardTitle className="flex items-center gap-2" glow>
+        <CardTitle className="flex items-center gap-2">
           <Thermometer className="w-4 h-4" />
           Wetter
         </CardTitle>
@@ -349,7 +349,7 @@ export function WeatherWidget({
               className={clsx(
                 'text-4xl font-bold tabular-nums transition-all duration-300',
                 weather.temperature !== null && weather.temperature > 25
-                  ? 'text-warning text-glow-warning'
+                  ? 'text-warning'
                   : weather.temperature !== null && weather.temperature < 5
                     ? 'text-cyan-400'
                     : 'text-text-primary'
@@ -424,12 +424,8 @@ export function WeatherHero({ entityId }: { entityId: string }) {
       <div>
         <p
           className={clsx(
-            'text-3xl font-bold tabular-nums transition-all duration-300',
-            weather.temperature !== null && weather.temperature > 25
-              ? 'text-warning text-glow-warning'
-              : weather.temperature !== null && weather.temperature < 5
-                ? 'text-cyan-400'
-                : 'text-text-primary'
+            'font-display text-3xl font-extrabold tabular-nums transition-all duration-300',
+            weather.temperature !== null && weather.temperature > 25 ? 'text-warning' : 'text-ink'
           )}
         >
           {weather.temperature !== null ? `${Math.round(weather.temperature)}°` : '--°'}

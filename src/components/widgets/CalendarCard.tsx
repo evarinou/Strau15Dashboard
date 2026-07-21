@@ -42,8 +42,8 @@ export function CalendarCard() {
             const Icon = isWaste ? Trash2 : CalendarDays
             return (
               <li key={`${event.start}-${index}`} className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-surface-hover flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4 h-4 text-accent-soft" />
+                <div className="glass-inset w-9 h-9 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-4 h-4 text-accent" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{event.summary}</p>

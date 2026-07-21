@@ -25,11 +25,11 @@ export function Music() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Musik</h1>
-          <p className="text-text-secondary">
-            {playingCount > 0
-              ? `${playingCount} Player aktiv`
-              : 'Keine Wiedergabe aktiv'}
+          <h1 className="font-display text-4xl lg:text-5xl font-extrabold tracking-[-0.03em] text-ink">
+            Musik
+          </h1>
+          <p className="text-text-secondary mt-1">
+            {playingCount > 0 ? `${playingCount} Player aktiv` : 'Keine Wiedergabe aktiv'}
           </p>
         </div>
         <Button variant="secondary" onClick={stopAll}>

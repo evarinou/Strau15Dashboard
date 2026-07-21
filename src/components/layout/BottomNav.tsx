@@ -11,21 +11,25 @@ const navItems = [
 
 export function BottomNav() {
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/80 backdrop-blur-lg border-t border-border safe-area-inset-bottom">
-      <div className="flex items-center justify-around h-16">
+    // pb-[env(safe-area-inset-bottom)] statt der früheren Klasse
+    // safe-area-inset-bottom, die nirgends definiert war und deshalb
+    // auf Geräten mit Home-Indikator kein Padding erzeugte.
+    <nav className="glass-panel glass-l3 lg:hidden fixed bottom-0 inset-x-0 z-40 rounded-none border-x-0 border-b-0 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex items-center justify-around h-16 px-2">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
+            end={to === '/'}
             className={({ isActive }) =>
               clsx(
-                'flex flex-col items-center justify-center gap-1 w-16 h-full transition-colors',
-                isActive ? 'text-accent' : 'text-text-secondary hover:text-text-primary'
+                'flex flex-col items-center justify-center gap-1 rounded-2xl w-16 h-[52px] transition-all',
+                isActive ? 'glass-l3 text-accent shadow-pill' : 'text-text-secondary'
               )
             }
           >
             <Icon className="w-5 h-5" />
-            <span className="text-[10px] font-medium">{label}</span>
+            <span className="text-[10px] font-semibold">{label}</span>
           </NavLink>
         ))}
       </div>

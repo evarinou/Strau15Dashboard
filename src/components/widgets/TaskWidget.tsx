@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Check, Clock, User, Sparkles } from 'lucide-react'
 import { clsx } from 'clsx'
-import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
 import { useCurrentUser } from '../../contexts/UserContext'
 import { useCompleteInstance } from '../../hooks/useChoreQuest'
@@ -15,14 +14,16 @@ interface TaskWidgetProps {
   compact?: boolean
 }
 
-// Generate random confetti particles
+/** Konfetti in den Farben des Hauses, nicht in Tailwind-Standardtönen. */
+const confettiColors = ['#FF9EBB', '#C9A7F5', '#FFB98A', '#8FD9C0', '#9FB8F0']
+
 function generateConfetti(count: number) {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     left: Math.random() * 100,
     delay: Math.random() * 0.5,
     duration: 1 + Math.random() * 1,
-    color: ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'][Math.floor(Math.random() * 5)],
+    color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
     size: 4 + Math.random() * 4,
   }))
 }
@@ -63,15 +64,19 @@ export function TaskWidget({
   const isCompleted = instance.status === 'completed' || showSuccess
   const isPending = instance.status === 'pending' && !showSuccess
 
+  const entranceDelayClass =
+    entranceDelay > 0 && entranceDelay <= 8 ? `animate-entrance-delay-${entranceDelay}` : ''
+
   return (
-    <Card
-      entrance={entrance}
-      entranceDelay={entranceDelay}
-      glowOnActive={isCompleted}
-      glowColor="success"
+    // Bewusst glass-inset statt Card: die Zeile sitzt immer in einem
+    // Panel, und ein zweiter backdrop-filter darin kostet Rechenzeit,
+    // ohne dass man den Unterschied sähe.
+    <div
       className={clsx(
-        'relative overflow-hidden transition-all duration-300',
-        showSuccess && 'animate-glow-burst'
+        'glass-inset p-4 relative overflow-hidden transition-all duration-300',
+        isCompleted && 'ring-1 ring-success/40',
+        entrance && 'animate-entrance',
+        entrance && entranceDelayClass
       )}
     >
       {/* Confetti overlay */}
@@ -105,16 +110,11 @@ export function TaskWidget({
             'transition-all duration-300',
             isCompleted
               ? 'bg-success border-success text-white'
-              : 'border-border hover:border-accent hover:bg-accent/10',
+              : 'border-text-muted/50 hover:border-accent hover:bg-accent/10',
             showSuccess && 'animate-scale-bounce'
           )}
-          style={{
-            boxShadow: isCompleted
-              ? '0 0 12px rgb(76 122 92 / 0.5)'
-              : 'none',
-          }}
         >
-          {isCompleted && <Check className="w-4 h-4 icon-glow-success" />}
+          {isCompleted && <Check className="w-4 h-4" />}
         </button>
 
         {/* Content */}
@@ -148,7 +148,7 @@ export function TaskWidget({
                   : 'bg-accent/10 text-accent'
               )}
             >
-              <Sparkles className={clsx('w-3 h-3', isCompleted && 'icon-glow-success')} />
+              <Sparkles className="w-3 h-3" />
               <span className={clsx(showSuccess && 'animate-count-pulse font-bold')}>
                 {instance.task.base_points}
               </span>
@@ -179,6 +179,6 @@ export function TaskWidget({
           </Button>
         )}
       </div>
-    </Card>
+    </div>
   )
 }

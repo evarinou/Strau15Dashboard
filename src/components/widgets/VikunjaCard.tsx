@@ -18,7 +18,7 @@ export function VikunjaCard() {
         <CardTitle>Projekt Strau15</CardTitle>
         <div className="flex items-center gap-2">
           {data.tasks.length > 0 && (
-            <span className="text-xs bg-accent/10 text-accent-soft px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full">
               {data.tasks.length} offen
             </span>
           )}

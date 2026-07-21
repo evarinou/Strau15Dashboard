@@ -19,7 +19,7 @@ export function SparklineChart({
   data,
   width = 100,
   height = 40,
-  color = 'rgb(216 90 48)',
+  color = 'rgb(from var(--color-accent) r g b)',
   fillOpacity = 0.2,
   strokeWidth = 1.5,
   showDots = false,

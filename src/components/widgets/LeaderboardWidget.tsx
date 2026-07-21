@@ -65,7 +65,7 @@ export function LeaderboardWidget({
           {[1, 2].map((i) => (
             <div
               key={i}
-              className={clsx('bg-surface-hover rounded-lg animate-shimmer', compact ? 'h-8' : 'h-12')}
+              className={clsx('bg-white/35 rounded-2xl animate-shimmer', compact ? 'h-8' : 'h-12')}
               style={{ animationDelay: `${i * 100}ms` }}
             />
           ))}
@@ -82,14 +82,11 @@ export function LeaderboardWidget({
     return (
       <Card entrance={entrance} entranceDelay={entranceDelay} className="!p-3">
         <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center"
-            style={{ boxShadow: '0 0 12px rgb(168 117 43 / 0.3)' }}
-          >
-            <Trophy className="w-5 h-5 text-warning icon-glow-warning" />
+          <div className="glass-inset w-10 h-10 flex items-center justify-center">
+            <Trophy className="w-5 h-5 text-warning" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate text-glow-warning">
+            <p className="text-sm font-medium truncate">
               {leader.display_name?.split(' ')[0] || leader.username}
             </p>
             <p className="text-xs text-text-secondary flex items-center gap-1">
@@ -105,8 +102,8 @@ export function LeaderboardWidget({
   return (
     <Card entrance={entrance} entranceDelay={entranceDelay}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2" glow>
-          <Trophy className="w-4 h-4 text-warning icon-glow-warning" />
+        <CardTitle className="flex items-center gap-2">
+          <Trophy className="w-4 h-4 text-warning" />
           Wochenrangliste
         </CardTitle>
       </CardHeader>
@@ -155,35 +152,19 @@ function LeaderboardRow({
   return (
     <div
       className={clsx(
-        'flex items-center gap-3 p-2 rounded-lg transition-all duration-300',
-        isCurrentUser && 'bg-accent/10 ring-1 ring-accent/30 border-glow-accent',
-        isLeader && !isCurrentUser && 'bg-warning/10'
+        'flex items-center gap-3 p-2.5 rounded-2xl transition-all duration-300',
+        isCurrentUser && 'glass-inset ring-1 ring-accent/35',
+        isLeader && !isCurrentUser && 'glass-inset'
       )}
-      style={{
-        boxShadow: isLeader
-          ? '0 0 20px rgb(168 117 43 / 0.15)'
-          : undefined,
-      }}
     >
       {/* Rank badge */}
       <div
         className={clsx(
           'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300',
-          isLeader
-            ? 'bg-warning text-white'
-            : 'bg-surface-hover text-text-secondary'
+          isLeader ? 'bg-warning-fill text-ink' : 'bg-white/45 text-text-secondary'
         )}
-        style={{
-          boxShadow: isLeader
-            ? '0 0 12px rgb(168 117 43 / 0.5)'
-            : undefined,
-        }}
       >
-        {isLeader ? (
-          <Trophy className="w-4 h-4 icon-glow-warning" />
-        ) : (
-          rank
-        )}
+        {isLeader ? <Trophy className="w-4 h-4" /> : rank}
       </div>
 
       {/* Name & stats */}
@@ -191,8 +172,7 @@ function LeaderboardRow({
         <p
           className={clsx(
             'text-sm font-medium truncate transition-all duration-300',
-            isCurrentUser && 'text-accent text-glow-accent',
-            isLeader && !isCurrentUser && 'text-glow-warning'
+            isCurrentUser ? 'text-accent' : 'text-text-primary'
           )}
         >
           {name}
@@ -217,13 +197,7 @@ function LeaderboardRow({
                 streak >= 7 ? 'text-danger' : 'text-warning'
               )}
             >
-              <Flame
-                className={clsx(
-                  'w-3 h-3',
-                  streak >= 3 && 'animate-float',
-                  streak >= 7 && 'icon-glow-warning'
-                )}
-              />
+              <Flame className={clsx('w-3 h-3', streak >= 3 && 'animate-float')} />
               <span className="font-medium">{streak}</span>
             </span>
           )}

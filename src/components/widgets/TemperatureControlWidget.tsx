@@ -27,14 +27,14 @@ const TYPE_CONFIG = {
   },
   bed: {
     icon: Square,
-    color: 'rgb(216 90 48)', // Cyan
+    color: 'rgb(from var(--color-accent) r g b)', // Cyan
     minDefault: 0,
     maxDefault: 120,
     stepDefault: 5,
   },
   chamber: {
     icon: Square,
-    color: 'rgb(76 122 92)', // Green
+    color: 'rgb(from var(--color-success) r g b)', // Green
     minDefault: 0,
     maxDefault: 60,
     stepDefault: 1,
@@ -88,8 +88,8 @@ export function TemperatureControlWidget({
     <div
       className={clsx(
         'p-4 rounded-xl transition-all duration-300',
-        isHeating && 'border-glow-on',
-        isAtTarget && 'border-glow-success',
+        isHeating && '',
+        isAtTarget && '',
         !isHeating && !isAtTarget && 'bg-surface-elevated/50',
         className
       )}

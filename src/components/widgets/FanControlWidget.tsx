@@ -26,10 +26,10 @@ const FAN_ICONS = {
 }
 
 const FAN_COLORS = {
-  aux: 'rgb(168 117 43)', // Yellow/warning
-  chamber: 'rgb(216 90 48)', // Accent blue
-  cooling: 'rgb(216 90 48)', // Cyan
-  generic: 'rgb(76 122 92)', // Green
+  aux: 'rgb(from var(--color-warning) r g b)', // Yellow/warning
+  chamber: 'rgb(from var(--color-accent) r g b)', // Accent blue
+  cooling: 'rgb(from var(--color-accent) r g b)', // Cyan
+  generic: 'rgb(from var(--color-success) r g b)', // Green
 }
 
 export function FanControlWidget({

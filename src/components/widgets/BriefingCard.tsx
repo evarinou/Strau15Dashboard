@@ -1,27 +1,29 @@
-import { Card } from '../ui/Card'
+import { GlassPanel } from '../ui/GlassPanel'
 import { useBriefing } from '../../hooks/useBff'
+import { useDaylightPhase } from '../../contexts/DaylightContext'
+import type { DaylightPhase } from '../../lib/daylight'
 
 interface BriefingCardProps {
   /** Vorname für die Begrüßung */
   name?: string
 }
 
-function greeting(): string {
-  const hour = new Date().getHours()
-  if (hour < 5) return 'Gute Nacht'
-  if (hour < 11) return 'Guten Morgen'
-  if (hour < 18) return 'Guten Tag'
-  return 'Guten Abend'
+/**
+ * Die Begrüßung folgt derselben Tagphase wie der Hintergrund. Eine
+ * Uhrzeit-Grenze würde im Juni „Guten Abend" sagen, während draußen
+ * und auf dem Schirm noch heller Tag ist.
+ */
+const greetings: Record<DaylightPhase, string> = {
+  daemmerung: 'Guten Morgen',
+  morgen: 'Guten Morgen',
+  tag: 'Guten Tag',
+  abend: 'Guten Abend',
+  nacht: 'Gute Nacht',
 }
 
 export function BriefingCard({ name }: BriefingCardProps) {
   const { data: briefing } = useBriefing()
-
-  const dateLine = new Date().toLocaleDateString('de-DE', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
+  const phase = useDaylightPhase()
 
   // Nicht-KI-Fassung aus den Rohbausteinen, falls (noch) kein Text existiert
   const fallbackParts: string[] = []
@@ -45,31 +47,30 @@ export function BriefingCard({ name }: BriefingCardProps) {
     : null
 
   return (
-    <Card tone="accent" padding="lg" className="animate-entrance">
-      {/* Begrüßung — Serif, die menschliche Stimme des Dashboards */}
-      <div className="flex items-baseline justify-between gap-4 flex-wrap">
-        <h1
-          className="font-serif text-accent-ink text-3xl sm:text-4xl"
-          style={{ fontWeight: 560, fontVariationSettings: "'opsz' 40" }}
-        >
-          {greeting()}
-          {name ? `, ${name}` : ''}
-        </h1>
-        <p className="text-sm text-text-secondary">{dateLine}</p>
-      </div>
+    <GlassPanel level={3} padding="lg" className="animate-entrance flex flex-col">
+      {/* Die Kugel trägt die Farben des Grundes — dasselbe Zeichen wie
+          neben der Wortmarke, hier als Anker der Begrüßung. */}
+      <span className="daylight-dot w-16 h-16 mb-5 self-center" aria-hidden="true" />
 
-      {/* Briefing „Was war / was kommt" — ebenfalls Serif */}
+      <h2 className="font-display font-extrabold text-ink text-2xl leading-tight text-center text-balance">
+        {greetings[phase]}
+        {name ? (
+          <>
+            ,<br />
+            {name}
+          </>
+        ) : (
+          ''
+        )}
+      </h2>
+
       {briefingText && (
-        <p
-          className="font-serif text-accent-text mt-4 text-base sm:text-lg leading-relaxed max-w-prose whitespace-pre-line"
-          style={{ fontWeight: 420, fontVariationSettings: "'opsz' 14" }}
-        >
+        <p className="text-text-primary mt-5 leading-relaxed whitespace-pre-line">
           {briefingText}
         </p>
       )}
 
-      {/* Funktionales bleibt Sans */}
-      {statusLine && <p className="mt-4 text-xs text-text-secondary">{statusLine}</p>}
-    </Card>
+      {statusLine && <p className="mt-auto pt-5 text-xs text-text-muted">{statusLine}</p>}
+    </GlassPanel>
   )
 }

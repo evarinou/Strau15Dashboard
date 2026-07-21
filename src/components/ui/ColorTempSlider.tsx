@@ -1,4 +1,4 @@
-import { type InputHTMLAttributes, forwardRef, useMemo } from 'react'
+import { type CSSProperties, type InputHTMLAttributes, forwardRef, useMemo } from 'react'
 import { clsx } from 'clsx'
 
 interface ColorTempSliderProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'type'> {
@@ -53,12 +53,7 @@ export const ColorTempSlider = forwardRef<HTMLInputElement, ColorTempSliderProps
     },
     ref
   ) => {
-    // Note: Higher mireds = warmer (lower Kelvin)
-    // We want warm on left, cool on right, so we invert the slider
-    const percentage = ((value - min) / (max - min)) * 100
-    const invertedPercentage = 100 - percentage // Invert so warm is left
-
-    // Calculate current color for glow
+    // Der Griff trägt die eingestellte Lichtfarbe
     const currentRgb = useMemo(() => miredsToRgb(value), [value])
     const currentColorString = `rgb(${currentRgb[0]}, ${currentRgb[1]}, ${currentRgb[2]})`
 
@@ -90,45 +85,28 @@ export const ColorTempSlider = forwardRef<HTMLInputElement, ColorTempSliderProps
             '[&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:duration-200',
             '[&::-webkit-slider-thumb]:hover:scale-110',
             '[&::-webkit-slider-thumb]:active:scale-95',
-            '[&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-surface',
+            '[&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white',
             // Firefox thumb
             '[&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5',
             '[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white',
-            '[&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-surface',
+            '[&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white',
             '[&::-moz-range-thumb]:cursor-pointer',
             '[&::-moz-range-thumb]:transition-all [&::-moz-range-thumb]:duration-200'
           )}
-          style={{
-            // Gradient from warm (low mireds = left) to cool (high mireds = right)
-            // But slider value is inverted: high mireds = warm, low = cool
-            // So we reverse: right side warm (#ffb46b), left side cool (#c9e2ff)
-            background: 'linear-gradient(to left, #ffb46b, #ffd6a5, #ffffff, #e0eeff, #c9e2ff)',
-            boxShadow: 'inset 0 0 0 1px rgb(211 209 199 / 0.3)',
-          }}
+          style={
+            {
+              // Rechts warm, links kalt — der Reglerwert läuft in Mired
+              // genau andersherum, deshalb der umgekehrte Verlauf.
+              background: 'linear-gradient(to left, #ffb46b, #ffd6a5, #ffffff, #e0eeff, #c9e2ff)',
+              boxShadow: 'inset 0 0 0 1px var(--color-border)',
+              // Der Griff trägt die eingestellte Lichtfarbe. Läuft über
+              // dieselbe Instanz-Variable wie beim normalen Slider —
+              // das frühere <style> zielte auf eine Klasse, die dem
+              // Input nie zugewiesen wurde, und traf deshalb nichts.
+              '--thumb-shadow': `0 0 8px ${currentColorString}, 0 2px 6px rgb(84 60 118 / 0.25)`,
+            } as CSSProperties
+          }
           {...props}
-        />
-
-        {/* Thumb position indicator with glow */}
-        <div
-          className="absolute top-[calc(50%+6px)] h-5 w-5 rounded-full pointer-events-none -translate-y-1/2 -translate-x-1/2 transition-all duration-100"
-          style={{
-            left: `${invertedPercentage}%`,
-            boxShadow: `0 0 12px ${currentColorString}`,
-          }}
-        />
-
-        {/* Custom thumb glow */}
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-              input[type="range"].color-temp-slider::-webkit-slider-thumb {
-                box-shadow: 0 0 8px ${currentColorString}, 0 2px 4px oklch(0 0 0 / 0.3);
-              }
-              input[type="range"].color-temp-slider::-moz-range-thumb {
-                box-shadow: 0 0 8px ${currentColorString}, 0 2px 4px oklch(0 0 0 / 0.3);
-              }
-            `,
-          }}
         />
       </div>
     )
