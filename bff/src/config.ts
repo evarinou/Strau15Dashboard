@@ -89,6 +89,19 @@ export const config = {
   paperlessToken: env('PAPERLESS_TOKEN'),
   briefingTtlHours: Number(env('BRIEFING_TTL_HOURS') ?? 6),
 
+  // Phase-3-Dienste (Medien): ebenfalls optional — je fehlendem Paar
+  // deaktiviert sich nur der jeweilige Bereich der Medien-Seite.
+  jellyfinUrl: serviceUrl('JELLYFIN_URL', env('JELLYFIN_URL')),
+  jellyfinApiKey: env('JELLYFIN_API_KEY'),
+  /** Name des Jellyfin-Haushalts-Accounts; leer = erster/einziger User des Servers. */
+  jellyfinUser: env('JELLYFIN_USER'),
+  sonarrUrl: serviceUrl('SONARR_URL', env('SONARR_URL')),
+  sonarrApiKey: env('SONARR_API_KEY'),
+  radarrUrl: serviceUrl('RADARR_URL', env('RADARR_URL')),
+  radarrApiKey: env('RADARR_API_KEY'),
+  seerrUrl: serviceUrl('SEERR_URL', env('SEERR_URL')),
+  seerrApiKey: env('SEERR_API_KEY'),
+
   /**
    * Header, den ein vorgeschalteter Authelia (o.ä.) nach dem Login setzt,
    * z.B. "Remote-User". Ist er gesetzt, brauchen Zugriffe aus dem Internet
@@ -128,6 +141,12 @@ export const config = {
       serviceUrl('CHOREQUEST_PUBLIC_URL', env('CHOREQUEST_PUBLIC_URL')) ??
       serviceUrl('CHOREQUEST_URL', env('CHOREQUEST_URL', 'VITE_CHOREQUEST_URL')) ??
       'http://strau15machine:8007',
+    jellyfin:
+      serviceUrl('JELLYFIN_PUBLIC_URL', env('JELLYFIN_PUBLIC_URL')) ??
+      serviceUrl('JELLYFIN_URL', env('JELLYFIN_URL')),
+    seerr:
+      serviceUrl('SEERR_PUBLIC_URL', env('SEERR_PUBLIC_URL')) ??
+      serviceUrl('SEERR_URL', env('SEERR_URL')),
   },
 }
 
@@ -140,6 +159,10 @@ export function logFeatureStatus(): void {
     'photos-personenfilter': config.immichPeople.length > 0,
     tasks: Boolean(config.vikunjaUrl && config.vikunjaToken),
     documents: Boolean(config.paperlessUrl && config.paperlessToken),
+    'media-jellyfin': Boolean(config.jellyfinUrl && config.jellyfinApiKey),
+    'media-sonarr': Boolean(config.sonarrUrl && config.sonarrApiKey),
+    'media-radarr': Boolean(config.radarrUrl && config.radarrApiKey),
+    'media-seerr': Boolean(config.seerrUrl && config.seerrApiKey),
   }
   for (const [name, enabled] of Object.entries(features)) {
     console.log(`[config] Feature ${name}: ${enabled ? 'aktiv' : 'deaktiviert (Env fehlt)'}`)
