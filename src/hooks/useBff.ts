@@ -85,6 +85,8 @@ export interface ServiceLinks {
   immich: string | null
   vikunja: string | null
   choreQuest: string
+  jellyfin: string | null
+  seerr: string | null
 }
 
 /** Öffentliche URLs der Hausdienste (z.B. https://immich.strau15.de) */

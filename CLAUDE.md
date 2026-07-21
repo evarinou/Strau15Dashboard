@@ -147,6 +147,7 @@ bff/                                # Fastify-BFF (eigenes npm-Paket)
     ├── routes/health.ts            # /health + /api/status
     ├── routes/chorequest.ts        # /api/chorequest/* Proxy
     ├── routes/ha-proxy.ts          # HA-Bild-Proxy (Album-Art, Avatare, Kamera)
+    ├── routes/media.ts             # /api/media/* (Jellyfin, Sonarr/Radarr, Seerr + Poster-Proxys)
     └── lib/upstream.ts             # fetch-Helper
 shared/
 └── api-types.ts                    # WS-Protokolltypen (Frontend + BFF)
@@ -178,11 +179,13 @@ src/
 │   └── UserContext.tsx           # Aktueller Benutzer
 ├── hooks/
 │   ├── useHomeAssistant.ts       # WebSocket Hook
-│   └── useChoreQuest.ts          # TanStack Query Hooks
+│   ├── useChoreQuest.ts          # TanStack Query Hooks
+│   └── useMedia.ts               # Hooks der Medien-Seite (Status, Watching, Upcoming, Suche/Request)
 ├── pages/
 │   ├── Dashboard.tsx             # Übersicht
 │   ├── Lights.tsx                # Alle Lichter
 │   ├── Music.tsx                 # Sonos-Steuerung
+│   ├── Medien.tsx                # Medien-Kommandozentrum (Jellyfin/arr/Seerr)
 │   ├── Tasks.tsx                 # Aufgaben-Liste
 │   ├── Rooms.tsx                 # Raum-Übersicht
 │   └── Room.tsx                  # Einzelner Raum
@@ -213,6 +216,12 @@ CHOREQUEST_TOKEN=<chorequest-api-token>
 ANTHROPIC_API_KEY=  IMMICH_URL=  IMMICH_API_KEY=
 VIKUNJA_URL=  VIKUNJA_TOKEN=  VIKUNJA_PROJECT=Strau15
 PAPERLESS_URL=  PAPERLESS_TOKEN=  BRIEFING_TTL_HOURS=6
+
+# Optional (Phase 3, Medien-Seite — je fehlendem Paar deaktiviert sich nur
+# der jeweilige Bereich; JELLYFIN_USER nur nötig bei mehreren Jellyfin-Usern)
+JELLYFIN_URL=  JELLYFIN_API_KEY=  JELLYFIN_USER=
+SONARR_URL=  SONARR_API_KEY=  RADARR_URL=  RADARR_API_KEY=
+SEERR_URL=  SEERR_API_KEY=
 ```
 
 **Wichtig:** Home Assistant und ChoreQuest verwenden separate Tokens!
@@ -343,8 +352,8 @@ const { data: leaderboard } = useWeeklyLeaderboard()
   jeweilige Karte blendet sich aus (Hooks in `src/hooks/useBff.ts`)
 
 **Externe Links:** `*_PUBLIC_URL`-Variablen (HA/IMMICH/PAPERLESS/VIKUNJA/
-CHOREQUEST) trennen die im Browser anklickbaren Domains von den internen
-Service-URLs, die der BFF für seine API-Aufrufe nutzt. `GET /api/links`
+CHOREQUEST/JELLYFIN/SEERR) trennen die im Browser anklickbaren Domains von den
+internen Service-URLs, die der BFF für seine API-Aufrufe nutzt. `GET /api/links`
 liefert sie ans Frontend (Hook `useLinks`); ohne gesetzten Wert fällt der
 Link auf die interne URL zurück. Genutzt in der Sidebar-Sektion „Dienste",
 der Foto-Karte (Deep-Link je Bild) sowie Vikunja- und Paperless-Karte.
@@ -364,6 +373,18 @@ der Foto-Karte (Deep-Link je Bild) sowie Vikunja- und Paperless-Karte.
 - Task-Completion mit Celebration Animation
 - Achievement-Fortschritt
 - Punkte-Anzeige
+
+### Medien (`/medien`)
+Jellyfin, Sonarr/Radarr und Seerr als eine menschliche Ansicht (Phase 3):
+- **Was schauen wir?** — Continue Watching + zuletzt hinzugefügt (Jellyfin,
+  gemeinsamer Haushalts-Account; Episoden zeigen das Serien-Poster)
+- **Was kommt?** — nächste Episoden/Film-Releases (Sonarr+Radarr gemerged;
+  fällt eine Quelle aus, liefert der Rest weiter)
+- **Wunsch äußern** — Seerr-Suche mit Anfrage; einzige schreibende Aktion,
+  Inline-Bestätigung („Wirklich?", verfällt nach 5s), Serien immer komplett
+- Alle Poster als Byte-Proxy über den BFF (auch TMDB) — same-origin, Keys
+  bleiben serverseitig. `GET /api/media/status` sagt den Karten, welche
+  Bereiche konfiguriert sind.
 
 ### Räume
 - Übersicht aller Räume

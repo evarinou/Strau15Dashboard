@@ -1,6 +1,6 @@
 # Strau15 Dashboard — Stand & nächste Schritte
 
-Stand: 20. Juli 2026. Dieses Dokument ist der Einstiegspunkt für die nächste
+Stand: 21. Juli 2026. Dieses Dokument ist der Einstiegspunkt für die nächste
 Arbeitssitzung: was läuft, was als Nächstes ansteht, was offen ist.
 
 ## Kurzüberblick
@@ -38,37 +38,21 @@ jeweilige Karte aus.
 aus dem Internet den `Remote-User`-Header, das Heimnetz bleibt frei.
 Verifiziert am 20.07.: extern ohne Login 403, mit Header 200, LAN 200.
 
-## Als Nächstes: Phase 3 — Medien-Kommandozentrum
+**Phase 3 — Medien-Kommandozentrum.** Seite `/medien` mit drei Bereichen:
+„Was schauen wir?" (Jellyfin: Weiterschauen + Neues, Poster-Bänder), „Was
+kommt?" (Sonarr+Radarr-Kalender gemerged, ausfalltolerant) und „Wunsch
+äußern" (Seerr-Suche mit Anfrage hinter Inline-Bestätigung — die einzige
+schreibende Aktion). Alle Poster als Byte-Proxy (auch TMDB), Keys nur im
+BFF, `GET /api/media/status` steuert die Karten-Sichtbarkeit. API-Annahmen
+vorab gegen die echten Instanzen verifiziert (Seerr 3.2.0 ist der
+Jellyseerr-Nachfolger; Jellyfin 10.11 nutzt `/UserItems/Resume`). Auf dem
+Server laufen alle vier Dienste; Jellyfin hat genau einen (gemeinsamen)
+Account.
 
-Aus dem ursprünglichen Auftrag, bewusst zurückgestellt bis der Zugriffsschutz
-stand. Ziel: arr-Stack, Jellyfin und Seerr als **eine menschliche Ansicht**,
-nicht als drei Admin-Oberflächen.
+## Als Nächstes
 
-Drei Fragen, drei Bereiche:
-
-| Frage | Quelle | Inhalt |
-|---|---|---|
-| „Was schauen wir?" | Jellyfin | Continue Watching + zuletzt hinzugefügt, mit Cover |
-| „Was kommt?" | Sonarr/Radarr | Kalender der nächsten Episoden und Filme |
-| „Wunsch äußern" | Jellyseerr | Suche + Anfrage stellen (die einzige schreibende Aktion) |
-
-Vorgehen analog zu Phase 2:
-
-1. BFF-Routen `bff/src/routes/media.ts` — `/api/media/continue`,
-   `/api/media/upcoming`, `/api/media/request`. Tokens serverseitig, Cover als
-   Byte-Proxy (wie bei Immich/Paperless).
-2. Env-Vars nach bestehendem Muster: `JELLYFIN_URL/JELLYFIN_API_KEY`,
-   `SONARR_URL/SONARR_API_KEY`, `RADARR_URL/RADARR_API_KEY`,
-   `SEERR_URL/SEERR_API_KEY` plus `*_PUBLIC_URL` für die Links. Fehlende Werte
-   deaktivieren nur den jeweiligen Bereich (503 `{disabled:true}`).
-3. Frontend: eigene Seite `/medien` (nicht auf die Startseite — die ist voll)
-   mit Sidebar-Eintrag. Card-Muster und Terrakotta-Kante wie in Phase 2.
-4. Vor dem Implementieren: API-Annahmen gegen die echten Instanzen prüfen
-   (bei Immich hat das einen Fehlgriff verhindert).
-
-**Vorher zu klären:** Welche Dienste laufen wirklich (Jellyseerr oder
-Overseerr? Radarr vorhanden?), unter welchen URLs, und ob Anfragen aus dem
-Dashboard direkt gestellt werden dürfen oder erst bestätigt werden sollen.
+Kein festes nächstes Großthema — Kandidaten aus dem Backlog unten:
+Widget-Feinschliff, Briefing vertiefen, Lint-Altlasten.
 
 ## Offene Punkte
 

@@ -16,6 +16,8 @@ import {
   Images,
   FileText,
   ListTodo,
+  Tv,
+  Popcorn,
   ExternalLink,
 } from 'lucide-react'
 import { useRooms } from '../../hooks/useChoreQuest'
@@ -50,6 +52,8 @@ export function Sidebar() {
     { href: links?.immich, icon: Images, label: 'Fotos' },
     { href: links?.paperless, icon: FileText, label: 'Dokumente' },
     { href: links?.vikunja, icon: ListTodo, label: 'Vikunja' },
+    { href: links?.jellyfin, icon: Tv, label: 'Jellyfin' },
+    { href: links?.seerr, icon: Popcorn, label: 'Seerr' },
   ].filter((service): service is { href: string; icon: typeof Home; label: string } =>
     Boolean(service.href)
   )
