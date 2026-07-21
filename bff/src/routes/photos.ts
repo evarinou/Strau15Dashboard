@@ -162,7 +162,7 @@ export function registerPhotoRoutes(app: FastifyInstance): void {
     }
 
     if (photoCache && Date.now() - photoCache.fetchedAt < PHOTO_TTL_MS) {
-      reply.header('cache-control', 'private, max-age=3600')
+      reply.header('cache-control', 'private, max-age=60')
       return { photos: photoCache.photos }
     }
 
@@ -174,7 +174,7 @@ export function registerPhotoRoutes(app: FastifyInstance): void {
       const photos = await searchRandom(personIds, 12)
 
       photoCache = { photos, fetchedAt: Date.now() }
-      reply.header('cache-control', 'private, max-age=3600')
+      reply.header('cache-control', 'private, max-age=60')
       return { photos }
     } catch (err) {
       request.log.warn({ err }, 'Immich nicht erreichbar')

@@ -40,7 +40,10 @@ export function usePhotos() {
   return useQuery({
     queryKey: ['bff', 'photos'],
     queryFn: () => fetchBff<{ photos: MemoryPhoto[] }>('/api/photos/today'),
-    staleTime: 60 * 60 * 1000,
+    // Server würfelt alle 6h neu; stündlich nachladen, damit die Auswahl
+    // auf dem Dauerbetrieb-Display über den Tag wechselt statt einzufrieren.
+    staleTime: 30 * 60 * 1000,
+    refetchInterval: 60 * 60 * 1000,
   })
 }
 
