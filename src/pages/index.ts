@@ -1,6 +1,7 @@
 export { Dashboard } from './Dashboard'
 export { Lights } from './Lights'
 export { Music } from './Music'
+export { Medien } from './Medien'
 export { Tasks } from './Tasks'
 export { Rooms } from './Rooms'
 export { Room } from './Room'

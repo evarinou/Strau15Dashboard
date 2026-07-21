@@ -1,6 +1,7 @@
 import {
   Home,
   Music,
+  Clapperboard,
   ClipboardList,
   DoorOpen,
   Sofa,
@@ -24,6 +25,7 @@ import { NavPill } from '../ui/NavPill'
 const mainNavItems = [
   { to: '/', icon: Home, label: 'Übersicht' },
   { to: '/music', icon: Music, label: 'Musik' },
+  { to: '/medien', icon: Clapperboard, label: 'Medien' },
   { to: '/tasks', icon: ClipboardList, label: 'Aufgaben' },
 ]
 

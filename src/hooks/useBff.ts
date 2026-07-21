@@ -4,7 +4,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 
-async function fetchBff<T>(url: string): Promise<T | null> {
+export async function fetchBff<T>(url: string): Promise<T | null> {
   const response = await fetch(url)
   if (response.status === 503) return null
   if (!response.ok) throw new Error(`BFF ${url}: ${response.status}`)
