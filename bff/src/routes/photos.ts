@@ -1,16 +1,21 @@
-// /api/photos — Immich „heute vor X Jahren". Der API-Key bleibt serverseitig;
-// Thumbnails laufen als Byte-Proxy durch den BFF.
+// /api/photos — zufällige Immich-Fotos, auf denen ALLE in IMMICH_PEOPLE
+// genannten Personen gemeinsam zu sehen sind (Immich verknüpft mehrere
+// personIds mit UND). Der API-Key bleibt serverseitig; Thumbnails laufen
+// als Byte-Proxy durch den BFF.
 
 import type { FastifyInstance } from 'fastify'
 import { config } from '../config.js'
 
 interface MemoryPhoto {
   id: string
-  year: number
   takenAt: string
 }
 
-let memoryCache: { photos: MemoryPhoto[]; fetchedAt: number; day: string } | null = null
+// Die Zufallsauswahl rotiert nicht bei jedem Request — sonst würde die
+// Karte bei jedem Refetch neu durchmischen. Sie bleibt für PHOTO_TTL_MS
+// stabil und wird danach neu gewürfelt.
+const PHOTO_TTL_MS = 6 * 3600_000
+let photoCache: { photos: MemoryPhoto[]; fetchedAt: number } | null = null
 /** Aufgelöste Personen-IDs aus IMMICH_PEOPLE (null = noch nicht aufgelöst) */
 let personIdCache: string[] | null = null
 
@@ -83,40 +88,70 @@ async function resolvePersonIds(): Promise<string[]> {
   return personIdCache
 }
 
-async function searchYear(
-  yearsBack: number,
-  now: Date,
-  personIds: string[]
-): Promise<MemoryPhoto[]> {
-  const year = now.getFullYear() - yearsBack
-  const dayStart = new Date(Date.UTC(year, now.getMonth(), now.getDate(), 0, 0, 0))
-  const dayEnd = new Date(Date.UTC(year, now.getMonth(), now.getDate(), 23, 59, 59))
+interface ImmichAsset {
+  id: string
+  fileCreatedAt?: string
+  localDateTime?: string
+}
 
+function toPhotos(items: ImmichAsset[]): MemoryPhoto[] {
+  return items.map((asset) => ({
+    id: asset.id,
+    takenAt: asset.localDateTime ?? asset.fileCreatedAt ?? new Date().toISOString(),
+  }))
+}
+
+/**
+ * Zufällige Fotos, auf denen alle übergebenen Personen gemeinsam zu sehen
+ * sind. Immich verknüpft mehrere personIds mit UND — genau das wollen wir
+ * hier („Lukas UND Eva-Maria").
+ *
+ * Bevorzugt `/api/search/random` (echte Zufallsauswahl über die ganze
+ * Mediathek). Ältere Immich-Versionen kennen den Endpoint nicht — dann
+ * fällt es auf die Metadaten-Suche zurück und mischt selbst durch, damit
+ * die Karte trotzdem etwas zeigt statt leer zu bleiben.
+ */
+async function searchRandom(personIds: string[], size: number): Promise<MemoryPhoto[]> {
+  const person = personIds.length > 0 ? { personIds } : {}
+
+  try {
+    const response = await fetch(`${config.immichUrl}/api/search/random`, {
+      method: 'POST',
+      headers: immichHeaders(),
+      body: JSON.stringify({ size, type: 'IMAGE', ...person }),
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!response.ok) throw new Error(`Immich-Zufallssuche: ${response.status}`)
+
+    const result = (await response.json()) as
+      | ImmichAsset[]
+      | { assets?: { items?: ImmichAsset[] } }
+    const items = Array.isArray(result) ? result : (result.assets?.items ?? [])
+    if (items.length > 0) return toPhotos(items)
+    // Leeres Ergebnis: unten regulär über die Metadaten-Suche versuchen
+  } catch (err) {
+    console.warn('[photos] /search/random nicht verfügbar, nutze Metadaten-Suche', err)
+  }
+
+  // Fallback: die Metadaten-Suche gibt es in jeder Immich-Version. Sie
+  // liefert neueste zuerst; wir holen eine größere Seite und mischen selbst.
   const response = await fetch(`${config.immichUrl}/api/search/metadata`, {
     method: 'POST',
     headers: immichHeaders(),
-    body: JSON.stringify({
-      takenAfter: dayStart.toISOString(),
-      takenBefore: dayEnd.toISOString(),
-      size: 5,
-      type: 'IMAGE',
-      // Immich verknüpft mehrere personIds mit UND — ein Foto muss alle
-      // genannten Personen zeigen. Für „Eva ODER Lukas" fragen wir daher
-      // pro Person einzeln ab (siehe Aufrufer).
-      ...(personIds.length > 0 ? { personIds } : {}),
-    }),
+    body: JSON.stringify({ size: 250, type: 'IMAGE', ...person }),
     signal: AbortSignal.timeout(10_000),
   })
   if (!response.ok) throw new Error(`Immich-Suche: ${response.status}`)
-
   const result = (await response.json()) as {
-    assets?: { items?: { id: string; fileCreatedAt?: string; localDateTime?: string }[] }
+    assets?: { items?: ImmichAsset[] }
   }
-  return (result.assets?.items ?? []).map((asset) => ({
-    id: asset.id,
-    year,
-    takenAt: asset.localDateTime ?? asset.fileCreatedAt ?? dayStart.toISOString(),
-  }))
+  const items = result.assets?.items ?? []
+  // Fisher-Yates auf einer Kopie, dann zuschneiden
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[items[i], items[j]] = [items[j], items[i]]
+  }
+  return toPhotos(items.slice(0, size))
 }
 
 export function registerPhotoRoutes(app: FastifyInstance): void {
@@ -126,36 +161,19 @@ export function registerPhotoRoutes(app: FastifyInstance): void {
       return { disabled: true }
     }
 
-    const now = new Date()
-    const day = now.toISOString().slice(0, 10)
-    // 1h-Cache — die „heute vor X Jahren"-Liste ändert sich untertägig nicht
-    if (memoryCache && memoryCache.day === day && Date.now() - memoryCache.fetchedAt < 3600_000) {
+    if (photoCache && Date.now() - photoCache.fetchedAt < PHOTO_TTL_MS) {
       reply.header('cache-control', 'private, max-age=3600')
-      return { photos: memoryCache.photos }
+      return { photos: photoCache.photos }
     }
 
     try {
       const personIds = await resolvePersonIds()
-      const years = Array.from({ length: 15 }, (_, i) => i + 1)
+      // Alle konfigurierten Personen in EINER Abfrage → Immich verlangt,
+      // dass jedes Foto sie alle zeigt. Etwas Überhang holen, damit die
+      // Karte auswählen kann; die Frontend-Auswahl schneidet zu.
+      const photos = await searchRandom(personIds, 12)
 
-      // Ohne Filter: eine Abfrage pro Jahr. Mit Filter: pro Jahr und Person
-      // eine Abfrage, damit „Eva ODER Lukas" gilt (Immich verknüpft mehrere
-      // personIds sonst mit UND).
-      const queries =
-        personIds.length > 0
-          ? years.flatMap((y) => personIds.map((id) => searchYear(y, now, [id])))
-          : years.map((y) => searchYear(y, now, []))
-
-      const results = await Promise.allSettled(queries)
-      const seen = new Set<string>()
-      const photos = results
-        .filter((r): r is PromiseFulfilledResult<MemoryPhoto[]> => r.status === 'fulfilled')
-        .flatMap((r) => r.value)
-        // Ein Foto mit beiden Personen käme sonst doppelt
-        .filter((photo) => (seen.has(photo.id) ? false : seen.add(photo.id)))
-        .sort((a, b) => b.year - a.year)
-
-      memoryCache = { photos, fetchedAt: Date.now(), day }
+      photoCache = { photos, fetchedAt: Date.now() }
       reply.header('cache-control', 'private, max-age=3600')
       return { photos }
     } catch (err) {

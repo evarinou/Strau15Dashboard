@@ -33,7 +33,6 @@ export function useBriefing() {
 
 export interface MemoryPhoto {
   id: string
-  year: number
   takenAt: string
 }
 
