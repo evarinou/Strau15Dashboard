@@ -1,19 +1,18 @@
 import { WatchingCard } from '../components/widgets/WatchingCard'
 import { ComingUpCard } from '../components/widgets/ComingUpCard'
-import { useMediaWatching, useMediaUpcoming } from '../hooks/useMedia'
+import { MediaWishCard } from '../components/widgets/MediaWishCard'
+import { useMediaStatus } from '../hooks/useMedia'
 
 // Medien-Kommandozentrum (Phase 3): Jellyfin, Sonarr/Radarr und Seerr als
-// eine menschliche Ansicht. Die Bereiche „Was kommt?" und „Wunsch äußern"
-// folgen in den nächsten Phasen.
+// eine menschliche Ansicht statt drei Admin-Oberflächen.
 
 export function Medien() {
-  const watching = useMediaWatching()
-  const upcoming = useMediaUpcoming()
+  const { data: status, isPending } = useMediaStatus()
 
   // Alle Bereiche serverseitig deaktiviert → kurzer Hinweis statt leerer
   // Seite; die Seite selbst bleibt immer erreichbar.
   const nichtsKonfiguriert =
-    !watching.isPending && !watching.data && !upcoming.isPending && !upcoming.data
+    !isPending && !(status?.watching || status?.upcoming || status?.wish)
 
   return (
     <div className="space-y-6">
@@ -34,6 +33,9 @@ export function Medien() {
           <div className="lg:col-span-2 space-y-4">
             <WatchingCard />
             <ComingUpCard />
+          </div>
+          <div className="space-y-4">
+            <MediaWishCard />
           </div>
         </div>
       )}

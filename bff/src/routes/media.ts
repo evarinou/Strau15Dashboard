@@ -284,10 +284,68 @@ function registerPosterProxy(
 }
 
 // ---------------------------------------------------------------------------
+// Seerr — „Wunsch äußern" (Suche + Request, die einzige schreibende Aktion)
+// ---------------------------------------------------------------------------
+
+function seerrEnabled(): boolean {
+  return Boolean(config.seerrUrl && config.seerrApiKey)
+}
+
+function seerrHeaders(): Record<string, string> {
+  return { 'X-Api-Key': config.seerrApiKey!, 'Content-Type': 'application/json' }
+}
+
+interface SeerrResult {
+  id: number
+  mediaType: 'movie' | 'tv' | 'person'
+  title?: string
+  name?: string
+  releaseDate?: string
+  firstAirDate?: string
+  overview?: string
+  posterPath?: string
+  mediaInfo?: { status?: number }
+}
+
+/** Overseerr-MediaStatus (1–5) → sprechender Status für die Karte */
+const SEERR_STATUS: Record<number, string> = {
+  2: 'pending',
+  3: 'processing',
+  4: 'partial',
+  5: 'available',
+}
+
+function toSearchResult(result: SeerrResult) {
+  const date = result.releaseDate ?? result.firstAirDate
+  return {
+    id: result.id,
+    mediaType: result.mediaType as 'movie' | 'tv',
+    title: result.title ?? result.name ?? '?',
+    year: date ? date.slice(0, 4) : null,
+    overview: result.overview ?? '',
+    status: SEERR_STATUS[result.mediaInfo?.status ?? 0] ?? 'none',
+    image: result.posterPath
+      ? `/api/media/poster/tmdb?path=${encodeURIComponent(result.posterPath)}`
+      : null,
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Routen
 // ---------------------------------------------------------------------------
 
 export function registerMediaRoutes(app: FastifyInstance): void {
+  // Welche Bereiche der Medien-Seite serverseitig konfiguriert sind —
+  // die Karten blenden sich damit aus, ohne erst ins Leere zu fetchen.
+  app.get('/api/media/status', async (_request, reply) => {
+    reply.header('cache-control', 'private, max-age=300')
+    return {
+      watching: jellyfinEnabled(),
+      upcoming: sonarrEnabled() || radarrEnabled(),
+      wish: seerrEnabled(),
+    }
+  })
+
   app.get('/api/media/continue', async (request, reply) => {
     if (!jellyfinEnabled()) {
       reply.status(503)
@@ -361,6 +419,119 @@ export function registerMediaRoutes(app: FastifyInstance): void {
 
   registerPosterProxy(app, 'sonarr', sonarrEnabled, () => config.sonarrUrl!, () => config.sonarrApiKey!)
   registerPosterProxy(app, 'radarr', radarrEnabled, () => config.radarrUrl!, () => config.radarrApiKey!)
+
+  app.get('/api/media/search', async (request, reply) => {
+    if (!seerrEnabled()) {
+      reply.status(503)
+      return { disabled: true }
+    }
+
+    const query = ((request.query as { query?: string }).query ?? '').trim()
+    if (query.length < 2) {
+      reply.status(400)
+      return { error: 'Suchbegriff zu kurz (min. 2 Zeichen)' }
+    }
+
+    try {
+      const response = await fetch(
+        `${config.seerrUrl}/api/v1/search?query=${encodeURIComponent(query)}&page=1`,
+        { headers: seerrHeaders(), signal: AbortSignal.timeout(10_000) }
+      )
+      if (!response.ok) throw new Error(`Seerr-Suche: ${response.status}`)
+      const result = (await response.json()) as { results?: SeerrResult[] }
+      reply.header('cache-control', 'no-store')
+      return {
+        results: (result.results ?? [])
+          .filter((entry) => entry.mediaType === 'movie' || entry.mediaType === 'tv')
+          .slice(0, 20)
+          .map(toSearchResult),
+      }
+    } catch (err) {
+      request.log.warn({ err }, 'Seerr nicht erreichbar')
+      reply.status(502)
+      return { error: 'Seerr nicht erreichbar' }
+    }
+  })
+
+  app.post('/api/media/request', async (request, reply) => {
+    if (!seerrEnabled()) {
+      reply.status(503)
+      return { disabled: true }
+    }
+
+    const body = request.body as { mediaType?: unknown; mediaId?: unknown }
+    const mediaType = body?.mediaType
+    const mediaId = body?.mediaId
+    if (
+      (mediaType !== 'movie' && mediaType !== 'tv') ||
+      typeof mediaId !== 'number' ||
+      !Number.isInteger(mediaId) ||
+      mediaId <= 0
+    ) {
+      reply.status(400)
+      return { error: 'Ungültige Anfrage (mediaType movie|tv, mediaId nötig)' }
+    }
+
+    try {
+      const response = await fetch(`${config.seerrUrl}/api/v1/request`, {
+        method: 'POST',
+        headers: seerrHeaders(),
+        // Bei Serien immer alle Staffeln — das Dashboard soll einfach bleiben;
+        // Feinauswahl macht man direkt in Seerr.
+        body: JSON.stringify({
+          mediaType,
+          mediaId,
+          ...(mediaType === 'tv' ? { seasons: 'all' } : {}),
+        }),
+        signal: AbortSignal.timeout(10_000),
+      })
+
+      if (!response.ok) {
+        const detail = (await response.json().catch(() => null)) as {
+          message?: string
+        } | null
+        // Upstream-Klartext (z.B. "bereits angefragt") durchreichen; nur
+        // 5xx wird zum generischen 502.
+        reply.status(response.status < 500 ? response.status : 502)
+        return { error: detail?.message ?? 'Seerr-Anfrage fehlgeschlagen' }
+      }
+
+      const created = (await response.json()) as { id?: number; status?: number }
+      reply.status(201)
+      return { ok: true, requestId: created.id ?? null }
+    } catch (err) {
+      request.log.warn({ err }, 'Seerr nicht erreichbar')
+      reply.status(502)
+      return { error: 'Seerr nicht erreichbar' }
+    }
+  })
+
+  app.get('/api/media/poster/tmdb', async (request, reply) => {
+    if (!seerrEnabled()) {
+      reply.status(503)
+      return { disabled: true }
+    }
+
+    const { path } = request.query as { path?: string }
+    if (!path || !/^\/[A-Za-z0-9]+\.(jpg|png)$/.test(path)) {
+      reply.status(400)
+      return { error: 'Ungültiger Poster-Pfad' }
+    }
+
+    try {
+      const response = await fetch(`https://image.tmdb.org/t/p/w342${path}`, {
+        signal: AbortSignal.timeout(15_000),
+      })
+      reply.status(response.status)
+      reply.header('content-type', response.headers.get('content-type') ?? 'image/jpeg')
+      reply.header('cache-control', 'private, max-age=86400')
+      return reply.send(Buffer.from(await response.arrayBuffer()))
+    } catch (err) {
+      request.log.warn({ err }, 'TMDB-Poster fehlgeschlagen')
+      reply.status(502)
+      return { error: 'TMDB nicht erreichbar' }
+    }
+  })
 
   app.get('/api/media/image/jellyfin/:id', async (request, reply) => {
     if (!jellyfinEnabled()) {
